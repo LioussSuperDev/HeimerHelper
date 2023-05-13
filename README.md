@@ -22,7 +22,9 @@ You can install Anaconda from https://www.anaconda.com/download .
 
 - Finally activate the environment and install all the required dependencies for the project to work :
 	> conda activate NAME_OF_YOUR_ENV
+
 	> conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+
 	> pip install riotwatcher
 
 I'm not curently using pytorch because I'm only gathering datas at the moment, but I will use it sooner or later. Now everything should work correctly !
