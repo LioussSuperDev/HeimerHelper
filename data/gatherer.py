@@ -7,19 +7,20 @@ sys.path.insert(0, '..')
 from bin.utils import api_getter
 watcher = api_getter.get_watcher()
 
-def populate_with_player(region, seed_player_name):
+def populate_with_player(region, seed_player_names):
     
     index = 0
 
-    sumDTO = watcher.summoner.by_name(region,seed_player_name)
-    list_to_check = [sumDTO["puuid"]]
+    list_to_check = []
+    for seed_player_name in seed_player_names:
+        sumDTO = watcher.summoner.by_name(region,seed_player_name)
+        list_to_check.append(sumDTO["puuid"])
 
     while list_to_check:
         print("Doing #"+str(index)+" ::: "+list_to_check[0])
         
         sumDTO = watcher.summoner.by_puuid(region, list_to_check[0])
         new_players = _populate_with_player(region, sumDTO)
-        #time.sleep(7) #Riot rate
 
         for player in new_players:
             if not player in list_to_check:
@@ -80,4 +81,4 @@ def _populate_with_player(region, sumDTO):
 
     return player_to_check
 
-populate_with_player("euw1","Liouss")
+populate_with_player("euw1",["DzuUwU","Rood Avel","Liouss","Edarek","Laiferenaevi","Eau distillée"])
