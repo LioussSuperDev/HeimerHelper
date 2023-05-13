@@ -59,8 +59,7 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 	```
 	The result of the created dataset will be in **data/rank_dataset_0**
 
-### Predict with my custom model (very bad at the moment)
- 
- 	```bash
-	python train.py
-	```
+### Train my custom model (very bad at the moment)
+```bash
+python simple_rank_dataset_creator.py
+```
