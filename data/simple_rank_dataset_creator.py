@@ -2,6 +2,8 @@ import sys
 import os
 from os.path import isfile, join
 import json
+sys.path.insert(0, '..')
+from bin.utils import progressbar
 
 def _index_from_lane_and_team(lane, team):
     index = 0
@@ -99,12 +101,23 @@ os.makedirs("rank_dataset_0", exist_ok=True)
 
 match_list = [f for f in os.listdir("league_dataset\\matches") if isfile(join("league_dataset\\matches", f))]
 
+index = 0
+expl = 0
+print()
+print("Clearing downloaded data and copying to rank_dataset_0/")
+print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
+
 for file in match_list:
     match_cleared_datas = handle_match(file)
     if match_cleared_datas != {}:
+        expl += 1
         file_path = os.path.join(os.path.dirname(__file__), "rank_dataset_0\\"+file)
         with open(join("rank_dataset_0",file), "w") as f:
             try:
                 f.write(json.dumps(match_cleared_datas))
             except:
                 print("Error writing",file)
+    index += 1
+    print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
+print()
+print("\nDone ! Found exploitable files :",expl)
