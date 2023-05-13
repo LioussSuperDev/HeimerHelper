@@ -80,4 +80,4 @@ def _populate_with_player(region, sumDTO):
 
     return player_to_check
 
-populate_with_player("euw1",["Pretty Pineapple","GlaceALaPapaye","TDS iReaz","Silverisys"])
+populate_with_player("euw1",["matthf"])

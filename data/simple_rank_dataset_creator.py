@@ -82,18 +82,29 @@ def handle_match(file):
 
                 points = -1
                 winrate = -1
+                hotstreak = False
                 for rank in p_data["ranks"]:
                     if rank["queueType"] == "RANKED_SOLO_5x5":
                         points = _rank_to_int(rank["tier"], rank["rank"], rank["leaguePoints"])
                         if rank["losses"]+rank["wins"] != 0:
                             winrate = rank["wins"]/(rank["losses"]+rank["wins"])
-            
+                        hotstreak = 1 if rank["hotStreak"] else 0
+
+                nb_won = 0
+                nb_total = len(p_data["last_10_matches"])
+                for match in p_data["last_10_matches"]:
+                    if match["win"]:
+                        nb_won += 1
+                last_10_winrate = nb_won/nb_total
                 p_index = str(_index_from_lane_and_team(position,team_id))
                 data["winner"] = winner
                 data["player_"+p_index+"_champion"] = champion
                 data["player_"+p_index+"_points"] = points
                 data["player_"+p_index+"_winrate"] = winrate
                 data["player_"+p_index+"_summoner_level"] = summoner_level
+                data["player_"+p_index+"_last_10_winrate"] = last_10_winrate
+                data["player_"+p_index+"_hotstreak"] = hotstreak
+                
 
     return data
 
