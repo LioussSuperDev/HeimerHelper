@@ -8,7 +8,6 @@ from bin.utils import api_getter
 watcher = api_getter.get_watcher()
 
 def populate_with_player(region, seed_player_names):
-    
     index = 0
 
     list_to_check = []
@@ -81,4 +80,4 @@ def _populate_with_player(region, sumDTO):
 
     return player_to_check
 
-populate_with_player("euw1",["DzuUwU","Rood Avel","Liouss","Edarek","Laiferenaevi","Eau distillée"])
+populate_with_player("euw1",["Pretty Pineapple","GlaceALaPapaye","TDS iReaz","Silverisys"])
