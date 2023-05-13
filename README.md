@@ -13,28 +13,32 @@ First setup your python environment. I personaly used **Anaconda** to create a c
 You can install Anaconda from https://www.anaconda.com/download .
 
 - Open an Anaconda Prompt, then create your environment with the following :
+	```bash
 	> conda create --name NAME_OF_YOUR_ENV
+	```
 	> *where NAME_OF_YOUR_ENV is the name of your new conda environment*
 
 - Then configure conda to be compatible with your shell :
+ 	```bash
 	> conda init SHELL_NAME
+	```
 	>*where SHELL_NAME can be powershell, cmd.exe or bash for exemple*
 
 - Finally activate the environment and install all the required dependencies for the project to work :
+	```bash
 	> conda activate NAME_OF_YOUR_ENV
-
 	> conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-
 	> pip install riotwatcher
-
+	```
 I'm not curently using pytorch because I'm only gathering datas at the moment, but I will use it sooner or later. Now everything should work correctly !
 
 ### How to gather datas
 - First you need to follow instructions at https://developer.riotgames.com/ to get a **Riot API key**. This step is mendatory for almost everything that follows, so take the time to do it. Note that the Riot development API Key expire after 24 hours and have several limitations (for exemple only 100 requests every 2 minutes).
  - Then create a file named "**API-KEY.txt**" at the root of this repo containing your Riot API Key. The scripts you'll launch will use the key you put inside of this file.
  - Now start the data/gatherer.py file with the following command :
-	 > python data/gatherer.py
-
+ 	```bash
+	python data/gatherer.py
+	```
 	You can stop the script at any moment with **Ctrl+C**. The longer you let it work the better it is as you'll gather more datas.
 
 
