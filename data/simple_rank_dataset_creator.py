@@ -22,8 +22,10 @@ def _index_from_lane_and_team(lane, team):
     return index
 
 def _rank_to_int(tier, rank, lps):
-    r = 0
+    r = -1
     match tier:
+        case "IRON":
+            r = 0
         case "BRONZE":
             r = 4
         case "SILVER":
@@ -37,14 +39,17 @@ def _rank_to_int(tier, rank, lps):
         case "MASTER":
             r = 24
         case "GRANDMASTER":
-            r = 28
+            r = 24
+        case "CHALLENGER":
+            r = 24
     match rank:
         case "III":
             r += 1
         case "II":
             r += 2
         case "I":
-            r += 3
+            if r != 24:
+                r += 3
     return r * 100 + lps
 
 def handle_match(file):
@@ -97,6 +102,8 @@ def handle_match(file):
                         nb_won += 1
                 last_10_winrate = nb_won/nb_total
                 p_index = str(_index_from_lane_and_team(position,team_id))
+                if "player_"+p_index+"_champion" in data:
+                    return {}
                 data["winner"] = winner
                 data["player_"+p_index+"_champion"] = champion
                 data["player_"+p_index+"_points"] = points
@@ -116,19 +123,22 @@ index = 0
 expl = 0
 print()
 print("Clearing downloaded data and copying to rank_dataset_0/")
-print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
+print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",expl,end="\r")
 
 for file in match_list:
+    file_path = os.path.join(os.path.dirname(__file__), "rank_dataset_0\\"+file)
     match_cleared_datas = handle_match(file)
     if match_cleared_datas != {}:
         expl += 1
-        file_path = os.path.join(os.path.dirname(__file__), "rank_dataset_0\\"+file)
         with open(join("rank_dataset_0",file), "w") as f:
             try:
                 f.write(json.dumps(match_cleared_datas))
             except:
                 print("Error writing",file)
+    else:
+        file_path2 = os.path.join(os.path.dirname(__file__), "league_dataset\\matches\\"+file)
+        os.remove(file_path2)
     index += 1
-    print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
+    print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",expl,end="\r")
 print()
 print("\nDone ! Found exploitable files :",expl)

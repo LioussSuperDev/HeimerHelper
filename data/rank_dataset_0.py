@@ -22,12 +22,18 @@ class RankDataSet0(Dataset):
         with open(file_path,"r") as f:
             match = json.load(f)
             winner = match.pop("winner")
-            if np.array(list(match.values())).shape[0] != 60:
-                print(file_path)
+
+            for i in range(10):
+                match.pop("player_"+str(i)+"_champion")
+
             return np.array(list(match.values())).astype(np.float32), np.array([2-winner]).astype(np.float32)
 
     def data_size(self):
         file_path = os.path.join(os.path.dirname(__file__), "rank_dataset_0\\"+self.match_list[0])
         with open(file_path,"r") as f:
             match = json.load(f)
+
+            for i in range(10):
+                match.pop("player_"+str(i)+"_champion")
+
             return len(match.values())-1
