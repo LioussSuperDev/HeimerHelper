@@ -5,7 +5,7 @@
 
 I'm doing this project to train new skills and learn how to gather data and train deep neural network models. I do not work for Riot Games or anything related to.
 
-## How to gather datas and train your own models ?
+## How to gather data and train your own models ?
 
 ### Installing dependencies 
 
