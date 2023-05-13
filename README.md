@@ -37,6 +37,7 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 - Then create a file named "**API-KEY.txt**" at the root of this repo containing your Riot API Key. The scripts you'll launch will use the key you put inside of this file.
 - I use "seed players" to explore data from every rank. You can change the names in the call of populate_with_player in the last line of data/gatherer.py.
 - Now start the data/gatherer.py file with the following :
+
  	```bash
 	cd data
 	python gatherer.py
@@ -52,6 +53,7 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 
 ### Create a first exploitable dataset
  - Now start the data/simple_rank_dataset_creator.py file with the following (expecting you to be in the data repository) :
+ 
  	```bash
 	python simple_rank_dataset_creator.py
 	```
