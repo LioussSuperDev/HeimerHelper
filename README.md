@@ -35,6 +35,7 @@ I'm not curently using pytorch because I'm only gathering datas at the moment, b
 ### How to gather datas
 - First you need to follow instructions at https://developer.riotgames.com/ to get a **Riot API key**. This step is mendatory for almost everything that follows, so take the time to do it. Note that the Riot development API Key expire after 24 hours and have several limitations (for exemple only 100 requests every 2 minutes).
  - Then create a file named "**API-KEY.txt**" at the root of this repo containing your Riot API Key. The scripts you'll launch will use the key you put inside of this file.
+ - I use "seed players" to explore datas from every rank. You can change the names in the call of populate_with_player in the last line of data/gatherer.py.
  - Now start the data/gatherer.py file with the following :
  	```bash
 	python data/gatherer.py
