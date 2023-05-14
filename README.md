@@ -60,15 +60,8 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 	```
 	The result of the created dataset will be in **src/rank_dataset/dataset**
 
-<<<<<<< HEAD
 ### Predict with my custom model (very bad at the moment)
 	Start src/rank_dataset/train.py
  	```bash
 	python train.py
 	```
-=======
-### Train my custom model (very bad at the moment)
-```bash
-python simple_rank_dataset_creator.py
-```
->>>>>>> 3ea016d6adb97ca86412ad6e886e286b71100eca

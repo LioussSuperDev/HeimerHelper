@@ -9,12 +9,13 @@ from utils import api_getter
 def load_player_data(region, puuid, save=False, player_save_directory_path=None, matches_save_directory_path=None, force_download=False, Debug=False):
 
     #Trying to load player data from local database
-    maybe_player_file = join(player_save_directory_path, puuid+".json")
-    if player_save_directory_path != None and not force_download and isfile(maybe_player_file):
-        with open(os.path.join(os.path.dirname(__file__), maybe_player_file)) as f:
-            if Debug:
-                print("Found player in local data.")
-            return json.load(f)
+    if player_save_directory_path != None and not force_download:
+        maybe_player_file = join(player_save_directory_path, puuid+".json")
+        if isfile(maybe_player_file):
+            with open(os.path.join(os.path.dirname(__file__), maybe_player_file)) as f:
+                if Debug:
+                    print("Found player in local data.")
+                return json.load(f)
         
     watcher = api_getter.get_watcher()
     sumDTO = watcher.summoner.by_puuid(region,puuid)
@@ -31,21 +32,23 @@ def load_player_data(region, puuid, save=False, player_save_directory_path=None,
 
         #Load or Download match
         local_loaded = False
-        maybe_match_file = join(matches_save_directory_path, match_id+".json")
-        if not force_download and isfile(maybe_match_file):
-            with open(os.path.join(os.path.dirname(__file__), maybe_match_file)) as f:
-                if Debug:
-                    print("Found Match in local data.")
-                match = json.load(f)
-                local_loaded = True
+        if matches_save_directory_path and not force_download:
+            maybe_match_file = join(matches_save_directory_path, match_id+".json")
+            if isfile(maybe_match_file):
+                with open(os.path.join(os.path.dirname(__file__), maybe_match_file)) as f:
+                    if Debug:
+                        print("Found Match in local data.")
+                    match = json.load(f)
+                    local_loaded = True
+            else:
+                match = watcher.match.by_id(region, match_id)
         else:
             match = watcher.match.by_id(region, match_id)
-
         #Saving Match
         if matches_save_directory_path != None and save and not local_loaded:
             file_path = os.path.join(os.path.dirname(__file__), matches_save_directory_path+"\\"+match["metadata"]["matchId"])+".json"
             os.makedirs(matches_save_directory_path, exist_ok=True)
-            if(not os.path.isfile(file_path)):
+            if not os.path.isfile(file_path):
                 with open(file_path, "w") as f:
                     f.write(json.dumps(match))
 

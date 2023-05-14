@@ -52,13 +52,13 @@ def _rank_to_int(tier, rank, lps):
                 r += 3
     return r * 100 + lps
 
-def handle_player(p_data, position, champion, team_id, summoner_level):
+def handle_player(p_data, position, champion, team_id, summoner_level, queueType="RANKED_SOLO_5x5"):
     data = {}
     points = -1
     winrate = -1
     hotstreak = False
     for rank in p_data["ranks"]:
-        if rank["queueType"] == "RANKED_SOLO_5x5":
+        if rank["queueType"] == queueType:
             points = _rank_to_int(rank["tier"], rank["rank"], rank["leaguePoints"])
             if rank["losses"]+rank["wins"] != 0:
                 winrate = rank["wins"]/(rank["losses"]+rank["wins"])
@@ -69,7 +69,7 @@ def handle_player(p_data, position, champion, team_id, summoner_level):
     for match in p_data["last_10_matches"]:
         if match["win"]:
             nb_won += 1
-    last_10_winrate = nb_won/nb_total
+    last_10_winrate = nb_won/nb_total if nb_total != 0 else 0.5
     p_index = str(_index_from_lane_and_team(position,team_id))
     if "player_"+p_index+"_champion" in data:
         return {}

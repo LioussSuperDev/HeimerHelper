@@ -52,7 +52,8 @@ max_accuracy = 0
 for test_index in range(50000):
     model = model_architectures.HHM2(dataset.data_size())
     model = model.to(device)
-    model.cuda()
+    if torch.cuda.is_available():
+        model.cuda()
 
     epoch_number = 0
     EPOCHS = 40
