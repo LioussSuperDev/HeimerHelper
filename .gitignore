@@ -1,3 +1,3 @@
 API-KEY.txt
-data/league_dataset
-data/rank_dataset_0
+src/data
+src/rank_dataset/dataset/

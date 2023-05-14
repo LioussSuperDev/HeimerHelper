@@ -1,4 +1,4 @@
-from riotwatcher import LolWatcher, ApiError
+from riotwatcher import LolWatcher
 import os
 
 _watcher = None
@@ -10,7 +10,7 @@ def get_watcher():
     return _watcher
 
 def get_api_key():
-    file_path = os.path.join(os.path.dirname(__file__), "../../API-KEY.txt")
+    file_path = os.path.join(os.path.dirname(__file__), "../API-KEY.txt")
     with open(file_path) as key_file:
         return key_file.readline()
     

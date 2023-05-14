@@ -39,7 +39,7 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 - Now start the data/gatherer.py file with the following :
 
  	```bash
-	cd data
+	cd src
 	python gatherer.py
 	```
 	You can stop the script at any moment with **Ctrl+C**. The longer you let it work the better it is as you'll gather more data.
@@ -52,15 +52,16 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 >**data/league_dataset/players** contains a file per player downloaded with the Riot API (see https://developer.riotgames.com/apis#summoner-v4/GET_getByRSOPUUID), merged with a list of match ids from the 10 last Solo/DuoQ from this player and the result (win or not) for each match, and the ranks of every queues corresponding to this player.
 
 ### Create a first exploitable dataset
- - Now start the data/simple_rank_dataset_creator.py file with the following (expecting you to be in the data repository) :
+ - Now start the src/rank_dataset/dataset_creator.py file with the following (expecting you to be in the data repository) :
  
  	```bash
-	python simple_rank_dataset_creator.py
+	cd rank_dataset
+	python dataset_creator.py
 	```
-	The result of the created dataset will be in **data/rank_dataset_0**
+	The result of the created dataset will be in **src/rank_dataset/dataset**
 
 ### Predict with my custom model (very bad at the moment)
- 
+	Start src/rank_dataset/train.py
  	```bash
 	python train.py
 	```
