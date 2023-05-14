@@ -61,7 +61,12 @@ I'm not currently using pytorch because I'm only gathering data at the moment, b
 	The result of the created dataset will be in **src/rank_dataset/dataset**
 
 ### Predict with my custom model (very bad at the moment)
-Start src/rank_dataset/train.py
+Start src/rank_dataset/train.py to train a model.
  ```bash
 python train.py
+```
+Then modify src/rank_dataset/predict.py to choose what you want to predict and with what model.
+start src/rank_dataset/predict.py to predict.
+ ```bash
+python predict.py
 ```
