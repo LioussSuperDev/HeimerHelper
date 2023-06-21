@@ -38,44 +38,21 @@ class HHM2(nn.Module):
         super(HHM2, self).__init__()
 
         self.bn0 = torch.nn.BatchNorm1d(input_size)
-        self.fc0 = nn.Linear(input_size, 20)
+        self.fc0 = nn.Linear(input_size, int(input_size*0.75))
 
-        self.bn1 = torch.nn.BatchNorm1d(20)
-        self.fc1 = nn.Linear(20, 20)
+        self.bn1 = torch.nn.BatchNorm1d(int(input_size*0.75))
+        self.fc1 = nn.Linear(int(input_size*0.75), int(input_size*0.75))
 
-        self.bn2 = torch.nn.BatchNorm1d(20)
-        self.fc2 = nn.Linear(20, 20)
+        self.bn2 = torch.nn.BatchNorm1d(int(input_size*0.75))
+        self.fc2 = nn.Linear(int(input_size*0.75), int(input_size*0.75))
 
-        self.bn3 = torch.nn.BatchNorm1d(20)
-        self.fc3 = nn.Linear(20, 20)
-
-        self.bn4 = torch.nn.BatchNorm1d(20)
-        self.fc4 = nn.Linear(20, 20)
-
-        self.bn5 = torch.nn.BatchNorm1d(20)
-        self.fc5 = nn.Linear(20, 20)
-
-        self.bn6 = torch.nn.BatchNorm1d(20)
-        self.fc6 = nn.Linear(20, 20)
-
-        self.bn7 = torch.nn.BatchNorm1d(20)
-        self.fc7 = nn.Linear(20, 20)
-
-        self.bn8 = torch.nn.BatchNorm1d(20)
-        self.fc8 = nn.Linear(20, 20)
-
-        self.bnfinal = torch.nn.BatchNorm1d(20)
-        self.fcfinal = nn.Linear(20, 1)
+        self.bnfinal = torch.nn.BatchNorm1d(int(input_size*0.75))
+        self.fcfinal = nn.Linear(int(input_size*0.75), 1)
     def forward(self, x):
+        x = x.float()
+
         x = F.relu(self.fc0(self.bn0(x)))
-        #x = F.relu(self.fc1(self.bn1(x)))
-        #x = F.relu(self.fc2(self.bn2(x)))
-        #x = F.relu(self.fc3(self.bn3(x)))
-        #x = F.relu(self.fc4(self.bn4(x)))
-        #x = F.relu(self.fc5(self.bn5(x)))
-        #x = F.relu(self.fc6(self.bn6(x)))
-        #x = F.relu(self.fc7(self.bn7(x)))
-        x = F.relu(self.fc8(self.bn8(x)))
+        x = F.relu(self.fc1(self.bn1(x)))
         x = F.sigmoid(self.fcfinal(self.bnfinal(x)))
         return x
     @property

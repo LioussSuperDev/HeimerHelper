@@ -5,52 +5,29 @@ import json
 sys.path.insert(0, '../..')
 from utils import progressbar
 
-def _index_from_lane_and_team(lane, team):
-    index = 0
-    match lane:
-        case "JUNGLE":
-            index = 1
-        case "MIDDLE":
-            index = 2
-        case "BOTTOM":
-            index = 3
-        case "UTILITY":
-            index = 4
-    
-    if team == 200:
-        index += 5
-    return index
+def most_frequent(List):
+    counter = 0
+    num = List[0]
+     
+    for i in List:
+        curr_frequency = List.count(i)
+        if(curr_frequency> counter):
+            counter = curr_frequency
+            num = i
+ 
+    return num
 
-def _rank_to_int(tier, rank, lps):
-    r = -1
-    match tier:
-        case "IRON":
-            r = 0
-        case "BRONZE":
-            r = 4
-        case "SILVER":
-            r = 8
-        case "GOLD":
-            r = 12
-        case "PLATINUM":
-            r = 16
-        case "DIAMOND":
-            r = 20
-        case "MASTER":
-            r = 24
-        case "GRANDMASTER":
-            r = 24
-        case "CHALLENGER":
-            r = 24
-    match rank:
-        case "III":
-            r += 1
-        case "II":
-            r += 2
-        case "I":
-            if r != 24:
-                r += 3
-    return r * 100 + lps
+def int_to_role(role):
+    if role == 4:
+        return "TOP"
+    elif role == 1:
+        return "JUNGLE"
+    elif role == 5:
+        return "MIDLANE"
+    elif role == 3:
+        return "ADC"
+    elif role == 2:
+        return "SUPPORT"
 
 def handle_match(file):
     data = {}
@@ -63,56 +40,89 @@ def handle_match(file):
             match = json.load(f)
         except:
             return {}
-        
-        #getting winner
-        winner = 1
-        for team in match["info"]["teams"]:
-            if team["win"] and team["teamId"] == 200:
-                winner = 2
-        player_list = match["info"]["participants"]
-        for p in player_list:
-            position = p["teamPosition"]
+    data = {"teamA":{},"teamB":{},"winner":1}
+
+    if match["winningTeam"] != 100:
+        data["winner"] = 0
+
+    for team in ["teamA","teamB"]:
+        for player in match["matchSummary"][team]:
+
+            pdata = {"matches":[],"wins":0,"losses":0,"premade":[],"championData":{"championId":player["championId"]}}
+
+            file_path = os.path.join(os.path.dirname(__file__), "..\\data\\players\\"+player["summonerName"]+".json")
+            if isfile(file_path):
+                 with open(file_path,"r") as f:
+                    try:
+                        player_queues = json.load(f)
+                        for queue in player_queues:
+                            if queue["queueType"] != 420:
+                                continue
+                            for perf in queue["basicChampionPerformances"]:
+                                if perf["championId"] == player["championId"]:
+                                    pdata["championData"]["wins"] = perf["wins"]
+                                    pdata["championData"]["totalMatches"] = perf["totalMatches"]
+                                    pdata["championData"]["lpAvg"] = perf["lpAvg"]
+                                    pdata["championData"]["csPerMatch"] = perf["cs"]/perf["totalMatches"]
+                                    pdata["championData"]["damagePerMatch"] = perf["damage"]/perf["totalMatches"]
+                                    pdata["championData"]["deathsPerMatch"] = perf["deaths"]/perf["totalMatches"]
+                                    pdata["championData"]["killsPerMatch"] = perf["kills"]/perf["totalMatches"]
+                                    pdata["championData"]["assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
+                                    pdata["championData"]["goldPerMatch"] = perf["gold"]/perf["totalMatches"]
+                    except:
+                        pass
             
-            champion = p["championId"]
-            team_id = p["teamId"]
-            summoner_level = p["summonerLevel"]
 
-            #filling rank informations
-            player_file_path = os.path.join(os.path.dirname(__file__), "..\\data\\players\\"+p["puuid"]+".json")
+            #adding basic data about player
+            for rank_player in match["allPlayerRanks"]:
+                if rank_player["summonerName"] == player["summonerName"]:
+                    for rank in rank_player["rankScores"]:
+                        if rank["queueType"] == "ranked_solo_5x5":
+                            pdata["tier"] = rank["tier"]
+                            pdata["rank"] = rank["rank"]
+                            pdata["lp"] = rank["lp"]
+                            pdata["wins"] = rank["wins"]
+                            pdata["losses"] = rank["losses"]
+
             
-            if not isfile(player_file_path):
-                return {} #Case if missing Player Data
-            with open(player_file_path,"r") as f2:
-                p_data = json.load(f2)
 
-                points = -1
-                winrate = -1
-                hotstreak = False
-                for rank in p_data["ranks"]:
-                    if rank["queueType"] == "RANKED_SOLO_5x5":
-                        points = _rank_to_int(rank["tier"], rank["rank"], rank["leaguePoints"])
-                        if rank["losses"]+rank["wins"] != 0:
-                            winrate = rank["wins"]/(rank["losses"]+rank["wins"])
-                        hotstreak = 1 if rank["hotStreak"] else 0
+            for last_match in player["last10matches"]:
+                nameInLastMatch = last_match["match"]["summonerName"]
+                isInTeam = -1
+                #finding premades in previous game
+                local_pre = {"teamA":[],"teamB":[]}
+                for previous_team in ["teamA","teamB"]:
+                    for previous_player in last_match["match"][previous_team]:
+                        if previous_player["summonerName"] == nameInLastMatch:
+                            isInTeam = previous_team
+                        for other_player in match["matchSummary"][team]:
+                            if other_player["summonerName"] != nameInLastMatch and other_player["summonerName"] == previous_player["summonerName"]:
+                                local_pre[previous_team].append(previous_player["summonerName"])
+                # if isInTeam == -1:
+                #     continue
+                pdata["premade"] += local_pre[isInTeam]
 
-                nb_won = 0
-                nb_total = len(p_data["last_10_matches"])
-                for match in p_data["last_10_matches"]:
-                    if match["win"]:
-                        nb_won += 1
-                last_10_winrate = nb_won/nb_total
-                p_index = str(_index_from_lane_and_team(position,team_id))
-                if "player_"+p_index+"_champion" in data:
-                    return {}
-                data["winner"] = winner
-                data["player_"+p_index+"_champion"] = champion
-                data["player_"+p_index+"_points"] = points
-                data["player_"+p_index+"_winrate"] = winrate
-                data["player_"+p_index+"_summoner_level"] = summoner_level
-                data["player_"+p_index+"_last_10_winrate"] = last_10_winrate
-                data["player_"+p_index+"_hotstreak"] = hotstreak
-                
-
+                #adding match to list
+                pdata["matches"].append({
+                    "win":last_match["win"],
+                    "matchDuration":last_match["match"]["matchDuration"],
+                    "championId":last_match["match"]["championId"],
+                    "kills":last_match["match"]["kills"],
+                    "damage":last_match["match"]["damage"],
+                    "gold":last_match["match"]["gold"],
+                    "deaths":last_match["match"]["deaths"],
+                    "assists":last_match["match"]["assists"],
+                    "cs":last_match["match"]["cs"],
+                    "visionScore":last_match["match"]["visionScore"],
+                    "role":int_to_role(last_match["match"]["role"]),
+                    "creation_gap":match["matchSummary"]["matchCreationTime"]-last_match["match"]["matchCreationTime"]
+                    })
+            if len(pdata["premade"]) != 0:
+                pdata["premade"] = [most_frequent(pdata["premade"])]
+                for premade_player in match["matchSummary"][team]:
+                    if premade_player["summonerName"] == pdata["premade"][0]:
+                        pdata["premade"] = [int_to_role(premade_player["role"])]
+            data[team][int_to_role(player["role"])] = pdata
     return data
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "dataset"), exist_ok=True)
