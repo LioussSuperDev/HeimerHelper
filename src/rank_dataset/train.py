@@ -56,7 +56,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 max_accuracy = 0
 print("Starting... data size :",dataset.get_datasize())
 
-learning_rates = [0.01,0.005,0.001,0.0005,0.0001]
+learning_rates = [0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01]
 weight_decays = [0,0.1,0.01,0.001,0.0001,0.00001]
 
 for lr in learning_rates:
