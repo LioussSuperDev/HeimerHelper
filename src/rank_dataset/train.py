@@ -5,7 +5,7 @@ import dataset
 import os
 import model_architectures
 
-BATCH_SIZE = 16
+BATCH_SIZE = 4
 
 def train_one_epoch(training_loader, optimizer, loss_fn, device):
     avg_loss = 0
@@ -56,11 +56,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 max_accuracy = 0
 print("Starting... data size :",dataset.get_datasize())
 
-learning_rates = [0.01,0.005,0.001,0.0005,0.0001]
-weight_decays = [0,0.1,0.01,0.001,0.0001,0.00001]
+learning_rates = [0.001,0.0005,0.0001,0.00005]
+weight_decays = [0,0.001,0.0001,0.00001]
 
-for lr in learning_rates:
-    for wd in weight_decays:
+for wd in weight_decays:
+    for lr in learning_rates:
+        print("======= LR :",lr,":: WD",wd,"=======")
         model = model_architectures.HHM2(dataset.get_datasize())
         model = model.to(device)
 
@@ -68,7 +69,7 @@ for lr in learning_rates:
             model.cuda()
 
         epoch_number = 0
-        EPOCHS = 40
+        EPOCHS = 15*int(0.01/lr)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
@@ -81,7 +82,7 @@ for lr in learning_rates:
             training_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
             test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
-            print("epoch",epoch)
+            print("epoch",str(epoch)+"/"+str(EPOCHS))
             model.train(True)
             avg_loss,train_acc = train_one_epoch(training_loader, optimizer, loss_fn, device)
             print()
