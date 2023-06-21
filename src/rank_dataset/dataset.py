@@ -77,15 +77,18 @@ def json_to_numpy(match):
             if len(player["premade"]) > 0:
                 returned[current_index+rank_size+role_to_int(player["premade"][0])] = 1
             returned[current_index+rank_size+role_size+player["championData"]["championId"]] = 1
-
+            # returned[current_index+rank_size+role_size] = player["championData"]["championId"]
             idx_from_now = current_index+rank_size+role_size+champion_number
-            returned[idx_from_now] = player["wins"]
-            returned[idx_from_now+1] = player["losses"]
+            returned[idx_from_now] = player["wins"]+player["losses"]
+            if player["wins"]+player["losses"] > 0:
+                returned[idx_from_now+1] = player["wins"]/(player["wins"]+player["losses"])
+            else:
+                returned[idx_from_now+1] = -1
             if "lp" in player:
                 returned[idx_from_now+2] = player["lp"]
             if "wins" in player["championData"]:
-                returned[idx_from_now+3] = player["championData"]["wins"]
-                returned[idx_from_now+4] = player["championData"]["totalMatches"]
+                returned[idx_from_now+3] = player["championData"]["totalMatches"]
+                returned[idx_from_now+4] = player["championData"]["wins"]/player["championData"]["totalMatches"]
                 returned[idx_from_now+5] = player["championData"]["lpAvg"]
                 returned[idx_from_now+6] = player["championData"]["csPerMatch"]
                 returned[idx_from_now+7] = player["championData"]["damagePerMatch"]
@@ -96,7 +99,7 @@ def json_to_numpy(match):
 
             for i,c_match in enumerate(player["matches"]):
                 returned[idx_from_now+12+i*player_match_size] = int(c_match["win"])
-                returned[idx_from_now+12+i*player_match_size+1] = (c_match["matchDuration"])
+                returned[idx_from_now+12+i*player_match_size+1] = (c_match["matchDuration"])/3600000
                 returned[idx_from_now+12+i*player_match_size+2] = (c_match["championId"])
                 returned[idx_from_now+12+i*player_match_size+3] = (c_match["kills"])
                 returned[idx_from_now+12+i*player_match_size+4] = (c_match["damage"])
@@ -107,8 +110,8 @@ def json_to_numpy(match):
                 returned[idx_from_now+12+i*player_match_size+9] = (c_match["visionScore"])
                 returned[idx_from_now+12+i*player_match_size+10] = (c_match["creation_gap"])
                 returned[idx_from_now+12+i*player_match_size+11+role_to_int(c_match["role"])] = 1
-            pindex += 1
 
+            pindex += 1
     return returned
 
 def get_datasize():

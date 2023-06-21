@@ -38,21 +38,29 @@ class HHM2(nn.Module):
         super(HHM2, self).__init__()
 
         self.bn0 = torch.nn.BatchNorm1d(input_size)
-        self.fc0 = nn.Linear(input_size, int(input_size*0.75))
+        self.fc0 = nn.Linear(input_size, 5000)
 
-        self.bn1 = torch.nn.BatchNorm1d(int(input_size*0.75))
-        self.fc1 = nn.Linear(int(input_size*0.75), int(input_size*0.75))
+        self.bn1 = torch.nn.BatchNorm1d(5000)
+        self.fc1 = nn.Linear(5000, 1000)
 
-        self.bn2 = torch.nn.BatchNorm1d(int(input_size*0.75))
-        self.fc2 = nn.Linear(int(input_size*0.75), int(input_size*0.75))
+        self.bn2 = torch.nn.BatchNorm1d(1000)
+        self.fc2 = nn.Linear(1000, 500)
 
-        self.bnfinal = torch.nn.BatchNorm1d(int(input_size*0.75))
-        self.fcfinal = nn.Linear(int(input_size*0.75), 1)
+        self.bn3 = torch.nn.BatchNorm1d(500)
+        self.fc3 = nn.Linear(500, 100)
+
+        self.bn4 = torch.nn.BatchNorm1d(100)
+        self.fc4 = nn.Linear(100, 50)
+
+        self.bnfinal = torch.nn.BatchNorm1d(50)
+        self.fcfinal = nn.Linear(50, 1)
     def forward(self, x):
         x = x.float()
-
         x = F.relu(self.fc0(self.bn0(x)))
         x = F.relu(self.fc1(self.bn1(x)))
+        x = F.relu(self.fc2(self.bn2(x)))
+        x = F.relu(self.fc3(self.bn3(x)))
+        x = F.relu(self.fc4(self.bn4(x)))
         x = F.sigmoid(self.fcfinal(self.bnfinal(x)))
         return x
     @property
