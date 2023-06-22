@@ -4,37 +4,38 @@ import torch.nn.functional as F
 import dataset
 import os
 import model_architectures
+import torch_directml
+import warnings
 
-BATCH_SIZE = 4
+warnings.filterwarnings("ignore")
+
+dml = torch_directml.device()
+
+BATCH_SIZE = 512
 
 def train_one_epoch(training_loader, optimizer, loss_fn, device):
+    nb_batches = len(training_loader)
     avg_loss = 0
     success = 0
     tot = 0
-    for i,data in enumerate(training_loader):
-        # Every data instance is an input + label pair
+    for idx,data in enumerate(training_loader):
         inputs, labels = data
 
         inputs = inputs.to(device)
         labels = labels.to(device)
 
-        # Zero your gradients for every batch!
         optimizer.zero_grad()
 
-        # Make predictions for this batch
         outputs = model(inputs)
 
-        # Compute the loss and its gradients
-        loss = loss_fn(outputs.squeeze(), labels)
+        given_outputs = outputs.squeeze()
+
+        loss = loss_fn(given_outputs, labels)
         loss.backward()
 
-        # Adjust learning weights
         optimizer.step()
 
-        # Gather data and report
         avg_loss += loss.item()
-
-        
 
         rounded = torch.round(outputs)
         tot += labels.shape[0]
@@ -46,36 +47,38 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
                 success += 1
                 l_succes += 1
 
-        print("loss/acc :",loss.item(),round(l_succes/rounded.shape[0],2),"                                                 ",end="\r")
+        print(str(round((idx+1)*100/nb_batches,2)),"% | loss/acc :",loss.item(),round(l_succes/rounded.shape[0],2),"                                                 ",end="\r")
     return avg_loss/len(training_loader),success/tot
 
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-max_accuracy = 0
-print("Starting... data size :",dataset.get_datasize())
+device = torch_directml.device()
 
-learning_rates = [0.001,0.0005,0.0001,0.00005]
-weight_decays = [0,0.001,0.0001,0.00001]
+max_accuracy = 0
+
+train_dataset = dataset.RankDataSet0(split="train")
+test_dataset = dataset.RankDataSet0(split="test")
+
+print("Starting... data size :",dataset.get_datasize())
+print("Number of training exemples :",len(train_dataset))
+learning_rates = [0.01,0.005,0.001,0.0007,0.0005,0.0001,0.00005]
+weight_decays = [0,0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.05]
 
 for wd in weight_decays:
     for lr in learning_rates:
         print("======= LR :",lr,":: WD",wd,"=======")
-        model = model_architectures.HHM2(dataset.get_datasize())
+        model = model_architectures.MLP1(dataset.get_datasize())
         model = model.to(device)
 
-        if torch.cuda.is_available():
-            model.cuda()
-
         epoch_number = 0
-        EPOCHS = 15*int(0.01/lr)
+        EPOCHS = 30
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
         loss_fn = torch.nn.BCELoss()
 
-        
         for epoch in range(EPOCHS):
             train_dataset = dataset.RankDataSet0(split="train")
             test_dataset = dataset.RankDataSet0(split="test")
@@ -87,7 +90,6 @@ for wd in weight_decays:
             avg_loss,train_acc = train_one_epoch(training_loader, optimizer, loss_fn, device)
             print()
             model.train(False)
-
             running_vloss = 0.0
             success = 0
             tot_acc = 0
