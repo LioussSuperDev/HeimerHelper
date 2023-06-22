@@ -21,4 +21,4 @@ def populate_with_player(region, seed_player_names):
 
 
 
-populate_with_player("euw1",["Asbjorn123456789", "HAYTEM", "Gonbat20", "Nad", "Aikap", "Trolzi", "Pekôms", "madin2002", "CliceV2", "Delvers", "sergiM", "Bier4TheWin"])
+populate_with_player("euw1",["fisinho","BASILHSKARAS","GigaChad Anti","emsolo","PiPPEN","212 VISION","brexit gaffer","Practice"])
