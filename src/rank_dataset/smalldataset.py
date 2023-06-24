@@ -1,6 +1,5 @@
 from typing import Iterator
 import numpy as np
-import torch
 from torch.utils.data import IterableDataset
 import json
 import os
@@ -43,12 +42,9 @@ def role_to_int(role):
     elif role == "SUPPORT":
         return 4
 
-champion_number = 1000
-player_match_size = 11+5
-basic_data_size = 4
-champion_data_size = champion_number + 9
-role_size = 5
-player_size = (basic_data_size+10*player_match_size+role_size+champion_data_size)
+player_match_size = 1
+basic_data_size = 5
+player_size = (basic_data_size+10*player_match_size)
 total_size = 10*player_size
 
 def json_to_numpy(match):
@@ -61,52 +57,31 @@ def json_to_numpy(match):
             player = match[team][player]
 
             current_index = pindex*player_size
+
+            #1
             if "tier" in player:
                 returned[current_index] = rank_to_int(player["tier"],player["rank"],player["lp"])
             else:
                 returned[current_index] = -1000
 
-            if len(player["premade"]) > 0:
-                returned[current_index+1+role_to_int(player["premade"][0])] = 1
+            #2
+            returned[current_index+1] = player["wins"]+player["losses"]
 
-            returned[current_index+1+role_size+player["championData"]["championId"]] = 1
-
-
-            # returned[current_index+rank_size+role_size] = player["championData"]["championId"]
-
-
-            idx_from_now = current_index+1+role_size+champion_number
-            returned[idx_from_now] = player["wins"]+player["losses"]
-
+            #3
             if player["wins"]+player["losses"] > 0:
-                returned[idx_from_now+1] = player["wins"]/(player["wins"]+player["losses"])
+                returned[current_index+2] = player["wins"]/(player["wins"]+player["losses"])
             else:
-                returned[idx_from_now+1] = -1
+                returned[current_index+2] = -1
 
             if "wins" in player["championData"]:
-                returned[idx_from_now+3] = player["championData"]["totalMatches"]
-                returned[idx_from_now+4] = player["championData"]["wins"]/player["championData"]["totalMatches"]
-                returned[idx_from_now+5] = player["championData"]["lpAvg"]
-                returned[idx_from_now+6] = player["championData"]["csPerMatch"]
-                returned[idx_from_now+7] = player["championData"]["damagePerMatch"]
-                returned[idx_from_now+8] = player["championData"]["deathsPerMatch"]
-                returned[idx_from_now+9] = player["championData"]["killsPerMatch"]
-                returned[idx_from_now+10] = player["championData"]["assistsPerMatch"]
-                returned[idx_from_now+11] = player["championData"]["goldPerMatch"]
+                #4
+                returned[current_index+3] = player["championData"]["totalMatches"]
+
+                #5
+                returned[current_index+4] = player["championData"]["wins"]/player["championData"]["totalMatches"]
 
             for i,c_match in enumerate(player["matches"]):
-                returned[idx_from_now+12+i*player_match_size] = int(c_match["win"])
-                returned[idx_from_now+12+i*player_match_size+1] = (c_match["matchDuration"])/3600000
-                returned[idx_from_now+12+i*player_match_size+2] = (c_match["championId"])
-                returned[idx_from_now+12+i*player_match_size+3] = (c_match["kills"])
-                returned[idx_from_now+12+i*player_match_size+4] = (c_match["damage"])
-                returned[idx_from_now+12+i*player_match_size+5] = (c_match["gold"])
-                returned[idx_from_now+12+i*player_match_size+6] = (c_match["deaths"])
-                returned[idx_from_now+12+i*player_match_size+7] = (c_match["assists"])
-                returned[idx_from_now+12+i*player_match_size+8] = (c_match["cs"])
-                returned[idx_from_now+12+i*player_match_size+9] = (c_match["visionScore"])
-                returned[idx_from_now+12+i*player_match_size+10] = (c_match["creation_gap"])
-                returned[idx_from_now+12+i*player_match_size+11+role_to_int(c_match["role"])] = 1
+                returned[current_index+5+i*player_match_size] = int(c_match["win"])
 
             pindex += 1
     return returned
