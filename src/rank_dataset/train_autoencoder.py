@@ -17,8 +17,6 @@ EPOCHS = 50
 def train_one_epoch(training_loader, optimizer, loss_fn, device):
     nb_batches = len(training_loader)
     avg_loss = 0
-    success = 0
-    tot = 0
     for idx,data in enumerate(training_loader):
         inputs, labels = data
 
@@ -31,7 +29,7 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
         given_outputs = outputs.squeeze()
 
-        loss = loss_fn(given_outputs, labels)
+        loss = loss_fn(given_outputs, inputs)
         loss.backward()
 
         optimizer.step()
@@ -39,17 +37,9 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
         avg_loss += loss.item()
 
         rounded = torch.round(outputs)
-        tot += labels.shape[0]
 
-        l_succes = 0
-
-        for i in range(rounded.shape[0]):
-            if rounded[i,0] == labels[i]:
-                success += 1
-                l_succes += 1
-
-        print(str(round((idx+1)*100/nb_batches,2)),"% | loss/acc :",round(loss.item(),3),round(l_succes/rounded.shape[0],2),"                                                 ",end="\r")
-    return avg_loss/len(training_loader),success/tot
+        print(str(round((idx+1)*100/nb_batches,2)),"% | loss/acc :",round(loss.item(),3),"                                                 ",end="\r")
+    return avg_loss/len(training_loader)
 
 
 
@@ -63,14 +53,14 @@ test_dataset = dataset.RankDataSet(split="test")
 print("Starting... data size :",dataset.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.01,0.1,0.05,0.005,0.001,0.0005,0.0001]
-weight_decays = [0,0.00001,0.0001,0.001,0.01]
-models = [(model_architectures.MLP1,"MLP1"),(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
-dsets = [(dataset,"big"),(smalldataset,"small")]
+learning_rates = [0.01]
+weight_decays = [0]
+models = [(model_architectures.MLP1_Autoencoder,"MLP1_Autoencoder")]
+dsets = [(dataset,"big")]
 
 for model_type,model_name in models:
 
-    max_accuracy = 0
+    max_vloss = 0
 
     for dset,dset_name in dsets:
 
@@ -88,7 +78,7 @@ for model_type,model_name in models:
 
                 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
-                loss_fn = torch.nn.BCELoss()
+                loss_fn = torch.nn.MSELoss()
 
                 for epoch in range(EPOCHS):
                     train_dataset = dset.RankDataSet(split="train")
@@ -101,8 +91,7 @@ for model_type,model_name in models:
                     avg_tloss,train_acc = train_one_epoch(training_loader, optimizer, loss_fn, device)
                     model.train(False)
                     running_vloss = 0.0
-                    success = 0
-                    tot_acc = 0
+
                     for i, vdata in enumerate(test_loader):
                         vinputs, vlabels = vdata
                         vinputs = vinputs.to(device)
@@ -113,20 +102,13 @@ for model_type,model_name in models:
                         vloss = loss_fn(voutputs, vlabels.unsqueeze(dim=1))
                         running_vloss += vloss.item()
 
-                        rounded = torch.round(voutputs)
-                        for j in range(vlabels.shape[0]):
-                            if rounded[j,0].item() == vlabels[j].item():
-                                success += 1
-                            tot_acc+=1
-
 
                     avg_vloss = running_vloss / (i+1)
-                    acc = success / tot_acc
-                    max_accuracy = max(max_accuracy,acc)
-                    print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,2), round(train_acc*100,2)))
-                    print('VALIDATION : {} - {}%/{}%'.format(round(avg_vloss,3),round(acc*100,2),round(max_accuracy*100,2)))
+                    max_vloss = max(avg_vloss,max_vloss)
+                    print('TRAIN :      {}                                                              '.format(round(avg_tloss,2)))
+                    print('VALIDATION : {}'.format(round(avg_vloss,3)))
                     print()
                     epoch_number += 1
                     os.makedirs("models/"+model_name, exist_ok=True)
-                    if acc == max_accuracy:
-                        torch.save(model.state_dict(), "models/"+model_name+"/"+str(round(acc,4))+"_l"+str(lr)+"_w"+str(wd)+"_dset"+dset_name+".state")
+                    if avg_vloss == max_vloss:
+                        torch.save(model.state_dict(), "models/"+model_name+"/"+str(round(avg_vloss,4))+"_l"+str(lr)+"_w"+str(wd)+"_dset"+dset_name+".state")
