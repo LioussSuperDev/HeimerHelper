@@ -119,4 +119,4 @@ for wd in weight_decays:
             epoch_number += 1
             os.makedirs("models", exist_ok=True)
             if acc == max_accuracy:
-                torch.save(model.state_dict(), "models/"+str(round(acc,4))+"_l"+str(lr)+"_w"+str(wd)+".state")
+                torch.save(model.state_dict(), "models/"+str(round(acc,4))+"_l"+str(lr)+"_w"+str(wd)+"_bsize"+str(BATCH_SIZE)+".state")
