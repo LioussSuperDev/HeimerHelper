@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import dataset
-import smalldataset
+import dataset_big
+import dataset_small
+import dataset_medium
 import os
 import model_architectures
-#import torch_directml
+import torch_directml
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -53,20 +54,20 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-#device = torch_directml.device()
+device = torch_directml.device()
 
-train_dataset = dataset.RankDataSet(split="train")
-test_dataset = dataset.RankDataSet(split="test")
+train_dataset = dataset_big.RankDataSet(split="train")
+test_dataset = dataset_big.RankDataSet(split="test")
 
-print("Starting... data size :",dataset.get_datasize())
+print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.01,0.1,0.05,0.005,0.001,0.0005,0.0001]
-weight_decays = [0,0.00001,0.0001,0.001,0.01]
-models = [(model_architectures.MLP1,"MLP1"),(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
-dsets = [(dataset,"big"),(smalldataset,"small")]
+learning_rates = [0.005,0.001,0.0005,0.0001,0.01,0.1,0.05,]
+weight_decays = [0.0001,0,0.00001,0.001,0.01]
+models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3"),(model_architectures.MLP1,"MLP1")]
+dsets = [(dataset_medium,"medium"),(dataset_small,"small"),(dataset_big,"big")]
 
 for model_type,model_name in models:
 

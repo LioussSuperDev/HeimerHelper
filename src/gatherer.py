@@ -8,7 +8,7 @@ def populate_with_player(region, seed_player_names):
     checked = []
     while seed_player_names:
         try:
-            new_players = gatherer_utils.load_player_data(region, seed_player_names[0], True, "data\\players", "data\\matches", False, True)
+            new_players,_ = gatherer_utils.load_player_data(region, seed_player_names[0], True, "data\\players", "data\\matches", False, True, verbose=True)
             for player in new_players:
                 if not player in seed_player_names and not player in checked:
                     seed_player_names.append(player)
@@ -21,4 +21,4 @@ def populate_with_player(region, seed_player_names):
 
 
 
-populate_with_player("euw1",["Daisy wants my D","my adc are GOOD","Nyash","Floppa enjoyer"])
+populate_with_player("euw1",["Fustercluck","Liouss","Queen Anabee","Darkk Sasuke","Suk Mike Hοk"])
