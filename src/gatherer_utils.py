@@ -6,7 +6,7 @@ sys.path.insert(0, '..')
 from utils import UGGApi
 import time
 
-def load_player_data(region, summonerName, save=False, player_save_directory_path=None, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=3, verbose=False):
+def load_player_data(region, summonerName, save=False, player_save_directory_path=None, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=3, verbose=False, small_verbose=False):
 
 
     player_neighbour=[]
@@ -15,59 +15,72 @@ def load_player_data(region, summonerName, save=False, player_save_directory_pat
         print("Doing summoner",summonerName)
 
     #Handling matches from current player
-    
-    matches = UGGApi.get_player_match_history(summonerName, regionId=region)
-    if verbose:
-        print("matches summaries loaded")
-    
+    max_page = ((max_number_of_matches-1)//20)+1
     returned_matches = []
-    for match in matches["matchSummaries"][:max_number_of_matches]:
+    
+    count = 0
+    for page in range(1,max_page+1):
 
-        masteries_dict = {}
+        try:
+            remaining_matches = min(20,max_number_of_matches-(page-1)*20)
 
-        match_creation_time = match["matchCreationTime"]
-        match_id = str(match["matchId"])
-
-        if verbose:
-            print("Gathering",match_id,"data")
-
-        #Load or Download match
-        local_loaded = False
-        if matches_save_directory_path != None:
-            maybe_match_file = join(matches_save_directory_path, match_id+".json")
-        else:
-            maybe_match_file = "UNKNOWN.not.exists"
-        if not force_download and isfile(maybe_match_file):
-            with open(os.path.join(os.path.dirname(__file__), maybe_match_file)) as f:
-                if Debug:
-                    print("Found Match in local data.")
-                match = json.load(f)
-                local_loaded = True
-        else:
-            match = UGGApi.get_match(match_id, summonerName, match["version"], regionId=region)
-
-        if not local_loaded:
-            for p in match["matchSummary"]["teamA"]:
-                player_neighbour.append(p["summonerName"])
-                masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, player_save_directory_path=player_save_directory_path, save=save, verbose=verbose)
-            for p in match["matchSummary"]["teamB"]:
-                player_neighbour.append(p["summonerName"])
-                masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, player_save_directory_path=player_save_directory_path, save=save, verbose=verbose)
+            matches = UGGApi.get_player_match_history(summonerName, regionId=region, page=page)
             if verbose:
-                print("last 10 matches of each player loaded                           ")
-        #Saving Match
-        if matches_save_directory_path != None and save and not local_loaded:
-            file_path = os.path.join(os.path.dirname(__file__), matches_save_directory_path+"\\"+match_id)+".json"
-            os.makedirs(matches_save_directory_path, exist_ok=True)
-            if(not os.path.isfile(file_path)):
-                with open(file_path, "w") as f:
-                    f.write(json.dumps(match))
-        teamnb = 1
-        for p in match["matchSummary"]["teamB"]:
-            if p["summonerName"].lower() == summonerName.lower():
-                teamnb = 2
-        returned_matches.append((match_id,match,masteries_dict,teamnb))
+                print("matches summaries loaded")
+            
+            
+            for match in matches["matchSummaries"][:remaining_matches]:
+                if small_verbose:
+                    print(count,max_number_of_matches,end="\r")
+                count += 1
+                masteries_dict = {}
 
+                match_creation_time = match["matchCreationTime"]
+                match_id = str(match["matchId"])
+
+                if verbose:
+                    print("Gathering",match_id,"data")
+
+                #Load or Download match
+                local_loaded = False
+                if matches_save_directory_path != None:
+                    maybe_match_file = join(matches_save_directory_path, match_id+".json")
+                else:
+                    maybe_match_file = "UNKNOWN.not.exists"
+                if not force_download and isfile(maybe_match_file):
+                    with open(os.path.join(os.path.dirname(__file__), maybe_match_file)) as f:
+                        if Debug:
+                            print("Found Match in local data.")
+                        match = json.load(f)
+                        local_loaded = True
+                else:
+                    match = UGGApi.get_match(match_id, summonerName, match["version"], regionId=region)
+
+                if not local_loaded:
+                    for p in match["matchSummary"]["teamA"]:
+                        player_neighbour.append(p["summonerName"])
+                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, player_save_directory_path=player_save_directory_path, save=save, verbose=verbose)
+                    for p in match["matchSummary"]["teamB"]:
+                        player_neighbour.append(p["summonerName"])
+                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, player_save_directory_path=player_save_directory_path, save=save, verbose=verbose)
+                    if verbose:
+                        print("last 10 matches of each player loaded                           ")
+                #Saving Match
+                if matches_save_directory_path != None and save and not local_loaded:
+                    file_path = os.path.join(os.path.dirname(__file__), matches_save_directory_path+"\\"+match_id)+".json"
+                    os.makedirs(matches_save_directory_path, exist_ok=True)
+                    if(not os.path.isfile(file_path)):
+                        with open(file_path, "w") as f:
+                            f.write(json.dumps(match))
+                teamnb = 1
+                for p in match["matchSummary"]["teamB"]:
+                    if p["summonerName"].lower() == summonerName.lower():
+                        teamnb = 2
+                returned_matches.append((match_id,match,masteries_dict,teamnb))
+        except:
+            pass
+    if small_verbose:
+        print("")
     return player_neighbour,returned_matches
 
 def get_single_player_stats(region, summonerName, matchCreationTime, player_save_directory_path=None, save=False, verbose=False):

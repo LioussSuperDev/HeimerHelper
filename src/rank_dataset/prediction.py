@@ -18,6 +18,7 @@ import gatherer_utils
 #loading the game
 sn = input("enter the summoner's name of one of the players in the game : ")
 choix = int(input("please enter the number of games you wish to analyse in match history (0 for live game) : "))
+prediction_mode = input("mode de prédiction ? s pour détaillé, autre sinon : ")
 
 live_game = False
 if choix == 0:
@@ -25,7 +26,7 @@ if choix == 0:
     matches = [("live",ma,mas,t)]
     live_game = True
 else:
-    _,matches = gatherer_utils.load_player_data("euw1", sn, max_number_of_matches=choix)
+    _,matches = gatherer_utils.load_player_data("euw1", sn, max_number_of_matches=choix, small_verbose=True)
 
 print("match(es) loaded !")
 
@@ -52,6 +53,7 @@ model3 = model_architectures.MLP3(dataset_small.get_datasize())
 model3.load_state_dict(torch.load("models\\MLP3\\0.8035_l0.005_w0.0001_dsetsmall.state", map_location=device))
 model3.eval()
 
+predictions = []
 for name,match,masteries,team_nb in matches:
 
     handled_match = _handle_match(match, masteries, 0, include_victory=False)
@@ -65,13 +67,23 @@ for name,match,masteries,team_nb in matches:
     outputs.append(model2(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
     outputs.append(model3(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
 
-    print("=============")
-    print("DOING MATCH",name)
-    print("=============")
-    print("")
+
+    if prediction_mode == "s":
+        print("=============")
+        print("DOING MATCH",name)
+        print("=============")
+        print("")
+
+    nb_T = 0
+    cert_T = 0
+    nb_F = 0
+    cert_F = 0
     for idx,output in enumerate(outputs):
-        print("---")
-        print("Result of model",(idx+1))
+
+        if prediction_mode == "s":
+            print("Result of model",(idx+1))
+
+
         certitude = output
         
         gagnant = 1
@@ -82,8 +94,29 @@ for name,match,masteries,team_nb in matches:
             certitude = (2*(certitude - 0.5))
         joueurGagnant = gagnant == team_nb
         certitude = certitude**(1/2)
-        print("prédiction originale :",round(output,4))
-        print("joueur gagnant :",joueurGagnant)
-        print("certitude :",str(round(certitude*100,2))+"%")
-        print("---")
-    print("")
+
+        if gagnant == team_nb:
+            nb_T += 1
+            cert_T += certitude
+        else:
+            nb_F += 1
+            cert_F += certitude
+
+
+        if prediction_mode == "s":
+            print("joueur gagnant :",joueurGagnant,str(round(certitude*100,2))+"%")
+
+    if prediction_mode == "s":
+        print("")
+
+    if nb_T > nb_F:
+        predictions.append("W")
+    elif nb_T < nb_F:
+        predictions.append("L")
+    else:
+        if cert_T > cert_T:
+            predictions.append("W")
+        else:
+            predictions.append("L")
+
+print(predictions)
