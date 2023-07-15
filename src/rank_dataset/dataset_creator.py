@@ -23,7 +23,7 @@ for file in match_list:
     if match_cleared_datas != {}:
         expl += 1
         split = "train"
-        if expl%4 == 0:
+        if expl%8 == 0:
             split = "test"
         with open(join(os.path.dirname(__file__), join("dataset/"+split,file)), "w") as f:
             try:

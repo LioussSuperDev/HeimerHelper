@@ -224,36 +224,6 @@ def handle_player(p_data, position, champion, team_id, summoner_level, queueType
     data["player_"+p_index+"_hotstreak"] = hotstreak
     return data
 
-def handle_match(match):
-    data = {}
-
-    #getting winner
-    winner = 1
-    for team in match["info"]["teams"]:
-        if team["win"] and team["teamId"] == 200:
-            winner = 2
-    data["winner"] = winner
-    player_list = match["info"]["participants"]
-
-    for p in player_list:
-        position = p["teamPosition"]
-        champion = p["championId"]
-        team_id = p["teamId"]
-        summoner_level = p["summonerLevel"]
-
-        #filling rank informations
-        player_file_path = os.path.join(os.path.dirname(__file__), "..\\data\\players\\"+p["puuid"]+".json")
-        
-        if not isfile(player_file_path):
-            return {} #Case if missing Player Data
-        with open(player_file_path,"r") as f2:
-            p_data = json.load(f2)
-            p_data_dic = handle_player(p_data,position,champion,team_id,summoner_level)
-            for key in p_data_dic:
-                data[key] = p_data_dic[key]
-            
-    return data
-
 def load_and_handle_match(file_path):
     if not isfile(file_path):
         return {}

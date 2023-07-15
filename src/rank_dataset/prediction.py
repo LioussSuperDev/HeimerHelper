@@ -11,14 +11,14 @@ import torch_directml
 from dataset_utils import _handle_match
 sys.path.insert(0, '..')
 import gatherer_utils
-
+import json
 
 
 
 #loading the game
 sn = input("enter the summoner's name of one of the players in the game : ")
 choix = int(input("please enter the number of games you wish to analyse in match history (0 for live game) : "))
-prediction_mode = input("mode de prédiction ? s pour détaillé, autre sinon : ")
+prediction_mode = input("press d for detailed predictions, else press enter : ")
 
 live_game = False
 if choix == 0:
@@ -42,7 +42,7 @@ model0.load_state_dict(torch.load("models\\MLP2\\0.8034_l0.01_w0.0001_dsetmedium
 model0.eval()
 
 model1 = model_architectures.MLP2(dataset_medium.get_datasize())
-model1.load_state_dict(torch.load("models\\MLP2\\0.7844_l0.005_w0.0001_dsetmedium.state", map_location=device))
+model1.load_state_dict(torch.load("models\\MLP2\\0.8211_l0.005_w0.001_dsetmedium.state", map_location=device))
 model1.eval()
 
 model2 = model_architectures.MLP3(dataset_small.get_datasize())
@@ -55,8 +55,14 @@ model3.eval()
 
 predictions = []
 for name,match,masteries,team_nb in matches:
-
     handled_match = _handle_match(match, masteries, 0, include_victory=False)
+
+    if live_game:
+        with open("last_live_game.json","w") as f:
+            json.dump(handled_match,f)
+    else:
+        with open("last_played_game.json","w") as f:
+            json.dump(handled_match,f)
 
     proper_match1 = dataset_medium.json_to_numpy(handled_match)
     proper_match2 = dataset_small.json_to_numpy(handled_match)
@@ -68,7 +74,7 @@ for name,match,masteries,team_nb in matches:
     outputs.append(model3(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
 
 
-    if prediction_mode == "s":
+    if prediction_mode == "d":
         print("=============")
         print("DOING MATCH",name)
         print("=============")
@@ -80,7 +86,7 @@ for name,match,masteries,team_nb in matches:
     cert_F = 0
     for idx,output in enumerate(outputs):
 
-        if prediction_mode == "s":
+        if prediction_mode == "d":
             print("Result of model",(idx+1))
 
 
@@ -88,10 +94,10 @@ for name,match,masteries,team_nb in matches:
         
         gagnant = 1
         if certitude <= 0.5:
-            certitude = (2*(0.5 - certitude))
+            certitude = ((abs(0.5-certitude))+0.5)
             gagnant = 2
         else:
-            certitude = (2*(certitude - 0.5))
+            certitude = ((abs(0.5-certitude))+0.5)
         joueurGagnant = gagnant == team_nb
         certitude = certitude**(1/2)
 
@@ -103,10 +109,10 @@ for name,match,masteries,team_nb in matches:
             cert_F += certitude
 
 
-        if prediction_mode == "s":
+        if prediction_mode == "d":
             print("joueur gagnant :",joueurGagnant,str(round(certitude*100,2))+"%")
 
-    if prediction_mode == "s":
+    if prediction_mode == "d":
         print("")
 
     if nb_T > nb_F:

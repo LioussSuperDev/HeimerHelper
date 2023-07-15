@@ -65,9 +65,9 @@ print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
 learning_rates = [0.005,0.001,0.0005,0.0001,0.01,0.1,0.05,]
-weight_decays = [0.0001,0,0.00001,0.001,0.01]
+weight_decays = [0.001,0.0001,0,0.00001,0.01]
 models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3"),(model_architectures.MLP1,"MLP1")]
-dsets = [(dataset_medium,"medium"),(dataset_small,"small"),(dataset_big,"big")]
+dsets = [(dataset_medium,"medium"),(dataset_small,"big"),(dataset_big,"small")]
 
 for model_type,model_name in models:
 
@@ -97,9 +97,13 @@ for model_type,model_name in models:
                     training_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
                     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
+                    #Training
                     print("-- EPOCH",str(epoch+1)+"/"+str(EPOCHS)+" --")
                     model.train(True)
                     avg_tloss,train_acc = train_one_epoch(training_loader, optimizer, loss_fn, device)
+                    
+                    
+                    #Testing
                     model.train(False)
                     running_vloss = 0.0
                     success = 0
@@ -119,11 +123,11 @@ for model_type,model_name in models:
                             if rounded[j,0].item() == vlabels[j].item():
                                 success += 1
                             tot_acc+=1
-
-
                     avg_vloss = running_vloss / (i+1)
                     acc = success / tot_acc
                     max_accuracy = max(max_accuracy,acc)
+
+                    
                     print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,2), round(train_acc*100,2)))
                     print('VALIDATION : {} - {}%/{}%'.format(round(avg_vloss,3),round(acc*100,2),round(max_accuracy*100,2)))
                     print()

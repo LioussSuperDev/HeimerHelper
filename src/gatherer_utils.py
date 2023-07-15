@@ -78,7 +78,8 @@ def load_player_data(region, summonerName, save=False, player_save_directory_pat
                         teamnb = 2
                 returned_matches.append((match_id,match,masteries_dict,teamnb))
         except:
-            pass
+            #IF U.GG cancels connection
+            time.sleep(10*60)
     if small_verbose:
         print("")
     return player_neighbour,returned_matches
