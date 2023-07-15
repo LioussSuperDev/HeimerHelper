@@ -64,10 +64,10 @@ test_dataset = dataset_big.RankDataSet(split="test")
 print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.005,0.001,0.0005,0.0001,0.01,0.1,0.05,]
-weight_decays = [0.001,0.0001,0,0.00001,0.01]
-models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3"),(model_architectures.MLP1,"MLP1")]
-dsets = [(dataset_medium,"medium"),(dataset_small,"big"),(dataset_big,"small")]
+learning_rates = [0.005,0.001,0.01,0.02]
+weight_decays = [0.001,0.0001,0.01]
+models = [(model_architectures.MLP1,"MLP1"),(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
+dsets = [(dataset_big,"big"),(dataset_medium,"medium"),(dataset_small,"small")]
 
 for model_type,model_name in models:
 

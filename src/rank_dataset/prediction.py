@@ -38,20 +38,20 @@ device = torch_directml.device()
 
 print("loading models...")
 model0 = model_architectures.MLP2(dataset_medium.get_datasize())
-model0.load_state_dict(torch.load("models\\MLP2\\0.8034_l0.01_w0.0001_dsetmedium.state", map_location=device))
+model0.load_state_dict(torch.load("models\\MLP2\\0.8026_l0.005_w0.001_dsetmedium.state", map_location=device))
 model0.eval()
 
 model1 = model_architectures.MLP2(dataset_medium.get_datasize())
-model1.load_state_dict(torch.load("models\\MLP2\\0.8211_l0.005_w0.001_dsetmedium.state", map_location=device))
+model1.load_state_dict(torch.load("models\\MLP2\\0.8082_l0.005_w0.001_dsetmedium.state", map_location=device))
 model1.eval()
 
-model2 = model_architectures.MLP3(dataset_small.get_datasize())
-model2.load_state_dict(torch.load("models\\MLP3\\0.7723_l0.005_w0.0001_dsetsmall.state", map_location=device))
+model2 = model_architectures.MLP2(dataset_medium.get_datasize())
+model2.load_state_dict(torch.load("models\\MLP2\\0.811_l0.005_w0.001_dsetmedium.state", map_location=device))
 model2.eval()
 
-model3 = model_architectures.MLP3(dataset_small.get_datasize())
-model3.load_state_dict(torch.load("models\\MLP3\\0.8035_l0.005_w0.0001_dsetsmall.state", map_location=device))
-model3.eval()
+# model3 = model_architectures.MLP3(dataset_small.get_datasize())
+# model3.load_state_dict(torch.load("models\\MLP3\\0.8035_l0.005_w0.0001_dsetsmall.state", map_location=device))
+# model3.eval()
 
 predictions = []
 for name,match,masteries,team_nb in matches:
@@ -68,10 +68,10 @@ for name,match,masteries,team_nb in matches:
     proper_match2 = dataset_small.json_to_numpy(handled_match)
 
     outputs = []
-    outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-    outputs.append(model1(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-    outputs.append(model2(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
-    outputs.append(model3(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
+    # outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    # outputs.append(model1(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    # outputs.append(model3(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
 
 
     if prediction_mode == "d":
