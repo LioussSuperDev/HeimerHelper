@@ -9,11 +9,11 @@ import random
 def rank_to_int(tier,rank,lp):
 
     rank_int = 0
-    if rank == "III":
+    if rank.lower() == "iii":
         rank_int = 1
-    elif rank == "II":
+    elif rank.lower() == "ii":
         rank_int = 2
-    elif rank == "I":
+    elif rank.lower() == "i":
         rank_int = 3
     tier_int = 0
     if tier.lower() == "bronze":
@@ -53,8 +53,8 @@ def json_to_numpy(match):
 
     pindex = 0
     for team in match:
-        for player in match[team]:
-            player = match[team][player]
+        for json_role in ["TOP","JUNGLE","MIDLANE","ADC","SUPPORT"]:
+            player = match[team][json_role]
 
             current_index = pindex*player_size
 

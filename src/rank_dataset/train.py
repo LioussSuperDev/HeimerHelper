@@ -1,17 +1,19 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import dataset
-import smalldataset
+import dataset_big
+import dataset_small
+import dataset_medium
+import dataset_teamonly
 import os
 import model_architectures
-#import torch_directml
+# import torch_directml
 import warnings
 
 warnings.filterwarnings("ignore")
 
 
-BATCH_SIZE = 512
+BATCH_SIZE = 256
 EPOCHS = 50
 
 def train_one_epoch(training_loader, optimizer, loss_fn, device):
@@ -55,18 +57,18 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-#device = torch_directml.device()
+# device = torch_directml.device()
 
-train_dataset = dataset.RankDataSet(split="train")
-test_dataset = dataset.RankDataSet(split="test")
+train_dataset = dataset_big.RankDataSet(split="train")
+test_dataset = dataset_big.RankDataSet(split="test")
 
-print("Starting... data size :",dataset.get_datasize())
+print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.01,0.1,0.05,0.005,0.001,0.0005,0.0001]
-weight_decays = [0,0.00001,0.0001,0.001,0.01]
-models = [(model_architectures.MLP1,"MLP1"),(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
-dsets = [(dataset,"big"),(smalldataset,"small")]
+learning_rates = [0.005,0.001,0.01,0.02]
+weight_decays = [0.001,0.0001,0.01]
+models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP1,"MLP1"),(model_architectures.MLP3,"MLP3")]
+dsets = [(dataset_medium,"medium"),(dataset_big,"big"),(dataset_small,"small")]
 
 for model_type,model_name in models:
 
@@ -82,7 +84,7 @@ for model_type,model_name in models:
                 print()
                 model = model_type(dsetsize)
                 model = model.to(device)
-
+    
                 epoch_number = 0
                 
 
@@ -96,9 +98,13 @@ for model_type,model_name in models:
                     training_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
                     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
+                    #Training
                     print("-- EPOCH",str(epoch+1)+"/"+str(EPOCHS)+" --")
                     model.train(True)
                     avg_tloss,train_acc = train_one_epoch(training_loader, optimizer, loss_fn, device)
+                    
+                    
+                    #Testing
                     model.train(False)
                     running_vloss = 0.0
                     success = 0
@@ -118,12 +124,12 @@ for model_type,model_name in models:
                             if rounded[j,0].item() == vlabels[j].item():
                                 success += 1
                             tot_acc+=1
-
-
                     avg_vloss = running_vloss / (i+1)
                     acc = success / tot_acc
                     max_accuracy = max(max_accuracy,acc)
-                    print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,2), round(train_acc*100,2)))
+
+                    
+                    print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,3), round(train_acc*100,2)))
                     print('VALIDATION : {} - {}%/{}%'.format(round(avg_vloss,3),round(acc*100,2),round(max_accuracy*100,2)))
                     print()
                     epoch_number += 1

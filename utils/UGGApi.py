@@ -18,6 +18,18 @@ roles_map = {
     "all":7
 }
 
+def update_ugg(summonerName, regionId="euw1"):
+    data = {
+            "operationName": "UpdatePlayerProfile",
+            "variables": {
+                "regionId": regionId,
+                "summonerName": summonerName
+            },
+            "query": "query UpdatePlayerProfile($regionId: String!, $summonerName: String!) {  updatePlayerProfile(region_id: $regionId, summoner_name: $summonerName) {    success    errorReason    __typename  }}"
+           }
+    x = requests.post("https://u.gg/api",json=data,headers=headers)
+    return json.loads(x.text)["data"]["updatePlayerProfile"]["success"]
+
 def get_player_stats(summonerName, role="all", seasonId=20, queueType=[420], regionId="euw1"):
     role = roles_map[role]
     data = {
@@ -68,3 +80,16 @@ def get_player_match_history(summonerName, role=[], regionId="euw1", duoName="",
            }
     x = requests.post("https://u.gg/api",json=data,headers=headers)
     return json.loads(x.text)["data"]["fetchPlayerMatchSummaries"]
+
+
+def get_player_current_game(summonerName, regionId="euw"):
+    data = {
+            "operationName": "GetLiveGame",
+            "variables": {
+                "regionId": regionId,
+                "summonerName":summonerName,
+            },
+            "query": "query GetLiveGame($regionId: String!, $summonerName: String!) {  getLiveGame(regionId: $regionId, summonerName: $summonerName) {    gameLengthSeconds    gameType    queueId    teamA {      banId      championId      championLosses      championWins      championStats {        kills        deaths        assists        __typename      }      currentRole      onRole      partyNumber      previousSeasonRankScore {        lastUpdatedAt        losses        lp        promoProgress        queueType        rank        role        seasonId        tier        wins        __typename      }      currentSeasonRankScore {        lastUpdatedAt        losses        lp        promoProgress        queueType        rank        role        seasonId        tier        wins        __typename      }      roleDatas {        games        roleName        wins        __typename      }      summonerIconId      summonerName      summonerRuneA      summonerRuneB      summonerRuneData      summonerSpellA      summonerSpellB      threatLevel      __typename    }    teamB {      banId      championId      championLosses      championWins      championStats {        kills        deaths        assists        __typename      }      currentRole      onRole      partyNumber      previousSeasonRankScore {        lastUpdatedAt        losses        lp        promoProgress        queueType        rank        role        seasonId        tier        wins        __typename      }      currentSeasonRankScore {        lastUpdatedAt        losses        lp        promoProgress        queueType        rank        role        seasonId        tier        wins        __typename      }      roleDatas {        games        roleName        wins        __typename      }      summonerIconId      summonerName      summonerRuneA      summonerRuneB      summonerRuneData      summonerSpellA      summonerSpellB      threatLevel      __typename    }    __typename  }}"
+           }
+    x = requests.post("https://u.gg/api",json=data,headers=headers)
+    return json.loads(x.text)["data"]["getLiveGame"]
