@@ -128,7 +128,7 @@ for model_type,model_name in models:
                     max_accuracy = max(max_accuracy,acc)
 
                     
-                    print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,2), round(train_acc*100,2)))
+                    print('TRAIN :      {} - {}%                                                              '.format(round(avg_tloss,3), round(train_acc*100,2)))
                     print('VALIDATION : {} - {}%/{}%'.format(round(avg_vloss,3),round(acc*100,2),round(max_accuracy*100,2)))
                     print()
                     epoch_number += 1
