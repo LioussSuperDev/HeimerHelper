@@ -85,7 +85,7 @@ def load_player_data(region, summonerName, save=False, player_save_directory_pat
     return player_neighbour,returned_matches
 
 def get_single_player_stats(region, summonerName, matchCreationTime, player_save_directory_path=None, save=False, verbose=False):
-    
+
     page = 1
     stats = []
 
@@ -122,7 +122,7 @@ def get_single_player_stats(region, summonerName, matchCreationTime, player_save
     return masteries,stats
 
 
-def gather_live_game(regionId, summonerName):
+def gather_live_game(regionId, summonerName, update_ugg=True):
     team_nb = 0
 
     def role_to_int(role):
@@ -136,6 +136,13 @@ def gather_live_game(regionId, summonerName):
             return 3
         elif role == "supp":
             return 2
+        
+    #updating every ugg profile
+    if update_ugg:
+        game = UGGApi.get_player_current_game(summonerName, regionId=regionId)
+        for team in ["teamA","teamB"]:
+            for player in game[team]: 
+                UGGApi.update_ugg(summonerName,regionId)
 
     game = UGGApi.get_player_current_game(summonerName, regionId=regionId)
     returned_game = {}

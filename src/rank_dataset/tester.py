@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import model_architectures
 import dataset_medium
-import torch_directml
+# import torch_directml
 
 def test_model(model, test_loader, device):
 
@@ -32,9 +32,9 @@ def test_model(model, test_loader, device):
     return cert_accuracies
 
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-device = torch_directml.device()
+# device = torch_directml.device()
 
 model = model_architectures.MLP2(dataset_medium.get_datasize())
 model.load_state_dict(torch.load("models\\MLP2\\0.8211_l0.005_w0.001_dsetmedium.state", map_location=device))

@@ -7,7 +7,7 @@ import dataset_medium
 import dataset_big
 import sys
 import numpy as np
-import torch_directml
+# import torch_directml
 from dataset_utils import _handle_match
 sys.path.insert(0, '..')
 import gatherer_utils
@@ -32,26 +32,26 @@ print("match(es) loaded !")
 
 sys.path.remove('..')
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-device = torch_directml.device()
+# device = torch_directml.device()
 
 print("loading models...")
-model0 = model_architectures.MLP2(dataset_medium.get_datasize())
-model0.load_state_dict(torch.load("models\\MLP2\\0.8026_l0.005_w0.001_dsetmedium.state", map_location=device))
+model0 = model_architectures.MLP1(dataset_medium.get_datasize())
+model0.load_state_dict(torch.load("models\\MLP1\\0.7981_l0.005_w0.001_dsetmedium.state", map_location=device))
 model0.eval()
 
-model1 = model_architectures.MLP2(dataset_medium.get_datasize())
-model1.load_state_dict(torch.load("models\\MLP2\\0.8082_l0.005_w0.001_dsetmedium.state", map_location=device))
+model1 = model_architectures.MLP1(dataset_medium.get_datasize())
+model1.load_state_dict(torch.load("models\\MLP1\\0.8002_l0.005_w0.001_dsetmedium.state", map_location=device))
 model1.eval()
 
 model2 = model_architectures.MLP2(dataset_medium.get_datasize())
-model2.load_state_dict(torch.load("models\\MLP2\\0.811_l0.005_w0.001_dsetmedium.state", map_location=device))
+model2.load_state_dict(torch.load("models\\MLP2\\0.7963_l0.005_w0.001_dsetmedium.state", map_location=device))
 model2.eval()
 
-# model3 = model_architectures.MLP3(dataset_small.get_datasize())
-# model3.load_state_dict(torch.load("models\\MLP3\\0.8035_l0.005_w0.0001_dsetsmall.state", map_location=device))
-# model3.eval()
+model3 = model_architectures.MLP2(dataset_medium.get_datasize())
+model3.load_state_dict(torch.load("models\\MLP2\\0.8046_l0.005_w0.001_dsetmedium.state", map_location=device))
+model3.eval()
 
 predictions = []
 for name,match,masteries,team_nb in matches:
@@ -68,10 +68,10 @@ for name,match,masteries,team_nb in matches:
     proper_match2 = dataset_small.json_to_numpy(handled_match)
 
     outputs = []
-    # outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-    # outputs.append(model1(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    outputs.append(model1(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
     outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-    # outputs.append(model3(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
+    outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
 
 
     if prediction_mode == "d":

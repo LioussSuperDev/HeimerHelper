@@ -18,6 +18,18 @@ roles_map = {
     "all":7
 }
 
+def update_ugg(summonerName, regionId="euw1"):
+    data = {
+            "operationName": "UpdatePlayerProfile",
+            "variables": {
+                "regionId": regionId,
+                "summonerName": summonerName
+            },
+            "query": "query UpdatePlayerProfile($regionId: String!, $summonerName: String!) {  updatePlayerProfile(region_id: $regionId, summoner_name: $summonerName) {    success    errorReason    __typename  }}"
+           }
+    x = requests.post("https://u.gg/api",json=data,headers=headers)
+    return json.loads(x.text)["data"]["updatePlayerProfile"]["success"]
+
 def get_player_stats(summonerName, role="all", seasonId=20, queueType=[420], regionId="euw1"):
     role = roles_map[role]
     data = {

@@ -34,6 +34,6 @@ for file in match_list:
         file_path2 = os.path.join(os.path.dirname(__file__), "..\\data\\matches\\"+file)
         os.remove(file_path2)
     index += 1
-    print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
+    print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")          ",end="\r")
 print()
 print("\nDone ! Found exploitable files :",expl)
