@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import model_architectures
-import dataset_medium
+import dataset_teamonly
 import torch_directml
 
 def test_model(model, test_loader, device):
@@ -36,13 +36,13 @@ def test_model(model, test_loader, device):
 #device = torch.device("cpu")
 device = torch_directml.device()
 
-model = model_architectures.MLP2(dataset_medium.get_datasize())
-model.load_state_dict(torch.load("models\\MLP2\\0.8211_l0.005_w0.001_dsetmedium.state", map_location=device))
+model = model_architectures.MLP2_TEAM(dataset_teamonly.get_datasize())
+model.load_state_dict(torch.load("models\\TEAMONLY\\TEAM MODEL\\0.5681_l0.005_w0.001_dsetmedium.state", map_location=device))
 model.eval()
 
-test_dataset = dataset_medium.RankDataSet(split="test")
+test_dataset = dataset_teamonly.RankDataSet(split="test")
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=512)
 cert_accuracies = test_model(model, test_loader, device)
-print("ACCURACY | CERTITUDE")
+print("ECHANTILLON | ACCURACY | CERTITUDE")
 for cert in cert_accuracies:
-    print(cert[0],cert[3])
+    print(cert[2],cert[0],cert[3])

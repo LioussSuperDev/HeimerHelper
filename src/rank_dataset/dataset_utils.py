@@ -78,13 +78,12 @@ def _handle_match(match, players_queues, winner, include_victory=True):
                 player_queues = players_queues[player["summonerName"]]
                 if player_queues != None:
                     for queue in player_queues:
-                        if queue["queueType"] != 420:
+                        if queue["queueType"] != 420 or queue["seasonId"] != 20:
                             continue
                         for perf in queue["basicChampionPerformances"]:
                             if perf["championId"] == player["championId"]:
                                 pdata["championData"]["wins"] = perf["wins"]
                                 pdata["championData"]["totalMatches"] = perf["totalMatches"]
-                                pdata["championData"]["lpAvg"] = perf["lpAvg"]
                                 pdata["championData"]["csPerMatch"] = perf["cs"]/perf["totalMatches"]
                                 pdata["championData"]["damagePerMatch"] = perf["damage"]/perf["totalMatches"]
                                 pdata["championData"]["deathsPerMatch"] = perf["deaths"]/perf["totalMatches"]

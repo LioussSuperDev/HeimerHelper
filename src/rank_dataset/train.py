@@ -7,7 +7,7 @@ import dataset_medium
 import dataset_teamonly
 import os
 import model_architectures
-# import torch_directml
+import torch_directml
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -55,9 +55,9 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-# device = torch_directml.device()
+device = torch_directml.device()
 
 train_dataset = dataset_big.RankDataSet(split="train")
 test_dataset = dataset_big.RankDataSet(split="test")
@@ -65,10 +65,10 @@ test_dataset = dataset_big.RankDataSet(split="test")
 print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.005,0.001,0.01,0.02]
+learning_rates = [0.005,0.004,0.006,0.001,0.01,0.02]
 weight_decays = [0.001,0.0001,0.01]
-models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP1,"MLP1"),(model_architectures.MLP3,"MLP3")]
-dsets = [(dataset_medium,"medium"),(dataset_big,"big"),(dataset_small,"small")]
+models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
+dsets = [(dataset_small,"small")]
 
 for model_type,model_name in models:
 

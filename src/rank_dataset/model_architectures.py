@@ -51,23 +51,23 @@ class MLP1(nn.Module):
     
 
 class MLP2(nn.Module):
-    def __init__(self, input_size):
+    def __init__(self, input_size, dropout=0.4):
         super(MLP2, self).__init__()
 
         self.bn0 = torch.nn.BatchNorm1d(input_size)
         self.fc0 = nn.Linear(input_size, 5000)
         self.relu0 = nn.ReLU()
-        self.dropout0 = nn.Dropout(0.4)
+        self.dropout0 = nn.Dropout(dropout)
 
         self.bn1 = torch.nn.BatchNorm1d(5000)
         self.fc1 = nn.Linear(5000, 500)
         self.relu1 = nn.ReLU()
-        self.dropout1 = nn.Dropout(0.4)
+        self.dropout1 = nn.Dropout(dropout)
 
         self.bn2 = torch.nn.BatchNorm1d(500)
         self.fc2 = nn.Linear(500, 50)
         self.relu2 = nn.ReLU()
-        self.dropout2 = nn.Dropout(0.4)
+        self.dropout2 = nn.Dropout(dropout)
 
         self.bnfinal = torch.nn.BatchNorm1d(50)
         self.fcfinal = nn.Linear(50, 1)

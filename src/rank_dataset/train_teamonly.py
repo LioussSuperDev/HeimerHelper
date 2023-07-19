@@ -7,7 +7,7 @@ import dataset_medium
 import dataset_teamonly
 import os
 import model_architectures
-# import torch_directml
+import torch_directml
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -55,9 +55,9 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-# device = torch_directml.device()
+device = torch_directml.device()
 
 train_dataset = dataset_big.RankDataSet(split="train")
 test_dataset = dataset_big.RankDataSet(split="test")
@@ -65,9 +65,9 @@ test_dataset = dataset_big.RankDataSet(split="test")
 print("Starting... data size :",dataset_big.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.005,0.001,0.01,0.02]
-weight_decays = [0.001,0.0001,0.01]
-models = [(model_architectures.MLP2_TEAM,"TEAM MODEL")]
+learning_rates = [0.01,0.005,0.001,0.02]
+weight_decays = [0.0001,0.0001,0.01]
+models = [(model_architectures.MLP2,"TEAM MODEL")]
 dsets = [(dataset_teamonly,"medium")]
 
 for model_type,model_name in models:
@@ -82,7 +82,7 @@ for model_type,model_name in models:
             for lr in learning_rates:
                 print("======= MODEL :",model_name,"DATASET",dset_name," LR :",lr,":: WD",wd,"=======")
                 print()
-                model = model_type(dsetsize)
+                model = model_type(dsetsize, dropout=0.2)
                 model = model.to(device)
     
                 epoch_number = 0
@@ -133,7 +133,6 @@ for model_type,model_name in models:
                     print('VALIDATION : {} - {}%/{}%'.format(round(avg_vloss,3),round(acc*100,2),round(max_accuracy*100,2)))
                     print()
                     epoch_number += 1
-                    os.makedirs("models/"+model_name, exist_ok=True)
                     os.makedirs("models/TEAMONLY/"+model_name, exist_ok=True)
                     
                     if acc == max_accuracy:
