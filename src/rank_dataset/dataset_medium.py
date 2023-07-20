@@ -6,42 +6,8 @@ import json
 import os
 from os.path import isfile, join
 import random
+from dataset_utils import rank_to_int,role_to_int
 
-def rank_to_int(tier,rank,lp):
-
-    rank_int = 0
-    if rank.lower() == "iii":
-        rank_int = 1
-    elif rank.lower() == "ii":
-        rank_int = 2
-    elif rank.lower() == "i":
-        rank_int = 3
-    tier_int = 0
-    if tier.lower() == "bronze":
-        tier_int = 4
-    elif tier.lower() == "silver":
-        tier_int = 8
-    elif tier.lower() == "gold":
-        tier_int = 12
-    elif tier.lower() == "platinum":
-        tier_int = 16
-    elif tier.lower() == "diamond":
-        tier_int = 20
-    elif tier.lower() == "master" or tier.lower() == "grandmaster" or tier.lower() == "challenger":
-        return 2400 + lp
-    return (tier_int + rank_int) * 100 + lp
-
-def role_to_int(role):
-    if role == "TOP":
-        return 0
-    elif role == "JUNGLE":
-        return 1
-    elif role == "MIDLANE":
-        return 2
-    elif role == "ADC":
-        return 3
-    elif role == "SUPPORT":
-        return 4
     
 player_match_size = 10+5
 basic_data_size = 4

@@ -30,7 +30,7 @@ def update_ugg(summonerName, regionId="euw1"):
     x = requests.post("https://u.gg/api",json=data,headers=headers)
     return json.loads(x.text)["data"]["updatePlayerProfile"]["success"]
 
-def get_player_stats(summonerName, role="all", seasonId=20, queueType=[420], regionId="euw1"):
+def get_player_stats(summonerName, role="all", seasonId=21, queueType=[420], regionId="euw1"):
     role = roles_map[role]
     data = {
             "operationName": "getPlayerStats",
@@ -63,7 +63,7 @@ def get_match(matchId, summonerName, version, regionId="euw1"):
     return json.loads(x.text)["data"]["match"]
 
 
-def get_player_match_history(summonerName, role=[], regionId="euw1", duoName="", championId=[], queueType=[420], seasonIds=[19,20], page=1):
+def get_player_match_history(summonerName, role=[], regionId="euw1", duoName="", championId=[], queueType=[420], seasonIds=[21], page=1):
     data = {
             "operationName": "FetchMatchSummaries",
             "variables": {

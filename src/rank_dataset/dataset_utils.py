@@ -33,6 +33,7 @@ def int_to_role(role):
 def handle_match(file, include_victory=True):
     data = {}
 
+    #Loading the file if possible
     file_path = os.path.join(os.path.dirname(__file__), "..\\data\\matches\\"+file)
     if not isfile(file_path):
         return data
@@ -41,21 +42,14 @@ def handle_match(file, include_victory=True):
             match = json.load(f)
         except:
             return {}
-        
+    players_queues = match["masteries_dict"]
+    match = match["match"]
+
+    #Telling who is the winner
     winner = 1
     if include_victory and match["winningTeam"] != 100:
         winner = 0
 
-    players_queues = {}
-
-    for team in ["teamA","teamB"]:
-        for player in match["matchSummary"][team]:
-
-            file_path = os.path.join(os.path.dirname(__file__), "..\\data\\players\\"+player["summonerName"]+".json")
-            if isfile(file_path):
-                 with open(file_path,"r") as f:
-                    player_queues = json.load(f)
-                    players_queues[player["summonerName"]] = player_queues
             
 
     return _handle_match(match, players_queues, winner, include_victory=True)
@@ -77,19 +71,16 @@ def _handle_match(match, players_queues, winner, include_victory=True):
             if player["summonerName"] in players_queues:
                 player_queues = players_queues[player["summonerName"]]
                 if player_queues != None:
-                    for queue in player_queues:
-                        if queue["queueType"] != 420 or queue["seasonId"] != 20:
-                            continue
-                        for perf in queue["basicChampionPerformances"]:
-                            if perf["championId"] == player["championId"]:
-                                pdata["championData"]["wins"] = perf["wins"]
-                                pdata["championData"]["totalMatches"] = perf["totalMatches"]
-                                pdata["championData"]["csPerMatch"] = perf["cs"]/perf["totalMatches"]
-                                pdata["championData"]["damagePerMatch"] = perf["damage"]/perf["totalMatches"]
-                                pdata["championData"]["deathsPerMatch"] = perf["deaths"]/perf["totalMatches"]
-                                pdata["championData"]["killsPerMatch"] = perf["kills"]/perf["totalMatches"]
-                                pdata["championData"]["assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
-                                pdata["championData"]["goldPerMatch"] = perf["gold"]/perf["totalMatches"]
+                    if player["championId"] in player_queues:
+                        perf = player_queues[player["championId"]]
+                        pdata["championData"]["wins"] = perf["wins"]
+                        pdata["championData"]["totalMatches"] = perf["totalMatches"]
+                        pdata["championData"]["csPerMatch"] = perf["cs"]/perf["totalMatches"]
+                        pdata["championData"]["damagePerMatch"] = perf["damage"]/perf["totalMatches"]
+                        pdata["championData"]["deathsPerMatch"] = perf["deaths"]/perf["totalMatches"]
+                        pdata["championData"]["killsPerMatch"] = perf["kills"]/perf["totalMatches"]
+                        pdata["championData"]["assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
+                        pdata["championData"]["goldPerMatch"] = perf["gold"]/perf["totalMatches"]
             
 
             #adding basic data about player
@@ -152,3 +143,30 @@ def load_and_handle_match(file_path):
             return handle_match(json.load(f))
         except:
             return {} 
+        
+
+def rank_to_int(tier,rank,lp):
+
+    rank_int = 0
+    if rank.lower() == "iii":
+        rank_int = 1
+    elif rank.lower() == "ii":
+        rank_int = 2
+    elif rank.lower() == "i":
+        rank_int = 3
+    tier_int = 0
+    if tier.lower() == "bronze":
+        tier_int = 4
+    elif tier.lower() == "silver":
+        tier_int = 8
+    elif tier.lower() == "gold":
+        tier_int = 12
+    elif tier.lower() == "platinum":
+        tier_int = 16
+    elif tier.lower() == "emerald":
+        tier_int = 20
+    elif tier.lower() == "diamond":
+        tier_int = 24
+    elif tier.lower() == "master" or tier.lower() == "grandmaster" or tier.lower() == "challenger":
+        return 2800 + lp
+    return (tier_int + rank_int) * 100 + lp
