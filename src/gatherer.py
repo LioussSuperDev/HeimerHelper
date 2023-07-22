@@ -9,6 +9,7 @@ def populate_with_player(region, seed_player_names):
     checked = []
     while seed_player_names:
         try:
+            print('=====')
             new_players,_ = gatherer_utils.load_player_data(region, seed_player_names[0], True, "data\\matches", False, True, verbose=True, max_number_of_matches=2)
             for player in new_players:
                 if not player in seed_player_names and not player in checked:

@@ -123,6 +123,13 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
             else:
                 match = UGGApi.get_match(match_id, summonerName, match["version"], regionId=region)
 
+            if match == None:
+                continue
+            if (not "matchSummary" in match) or (match["matchSummary"] == None):
+                print(match)
+                exit(1)
+                continue
+
             if not local_loaded:
                 for team in ["teamA","teamB"]:
                     for p in match["matchSummary"][team]:
