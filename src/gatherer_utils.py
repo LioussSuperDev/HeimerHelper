@@ -2,6 +2,7 @@ import sys
 import os
 from os.path import isfile, join
 import json
+import time
 sys.path.insert(0, '..')
 from utils import UGGApi
 
@@ -73,7 +74,7 @@ def get_next_tier_rank(tier,rank):
         return get_next_tier(tier),"i"
     return tier,get_next_rank(rank)
 
-def load_player_data(region, summonerName, save=False, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=1, verbose=False, small_verbose=False):
+def load_player_data(region, summonerName, save=False, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=1, verbose=False, small_verbose=False, time_limit_hours=None):
 
 
     player_neighbour=[]
@@ -102,6 +103,13 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
             masteries_dict = {}
 
             match_creation_time = match["matchCreationTime"]
+            now_time = time.time()*1000
+
+            if now_time - match_creation_time > time_limit_hours*3600000:
+                if verbose:
+                    print("match creation time exceeded. skipping current player. late of :",int((now_time - match_creation_time)/3600000)-time_limit_hours,"hours")
+                break
+
             match_id = str(match["matchId"])
 
             if verbose:
@@ -125,10 +133,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
 
             if match == None:
                 continue
-            if (not "matchSummary" in match) or (match["matchSummary"] == None):
-                print(match)
-                exit(1)
-                continue
+
 
             if not local_loaded:
                 for team in ["teamA","teamB"]:
