@@ -20,13 +20,10 @@ def populate_with_player(region, seed_player_names):
             print("Missing data in this game. Skipping the player...")
             del seed_player_names[0]
 
-
-#DemeNtoRIl MASTER-CHALL
-#MxVII HIGH DIAMOND
-#I play blu bird LOW DIAMOND
-#Anchoret EMERALD
-#strong as Jotaro GOLD
-#Coldfingerz GOLD
-#ZetaArcticFoxes Silver
-#InvokinHeron BRONZE
-populate_with_player("euw1",["DemeNtoRIl","MxVII", "I play blu bird","Anchoret","strong as Jotaro","Coldfingerz","ZetaArcticFoxes","InvokinHeron"])
+#CHALLENGER NoMoreAutopilot
+#HIGH DIAMOND Tytoccid
+#EMERALD swxAurélien
+#PLATINUM DarKMissiles
+#GOLD Hide On Grass1
+#SILVER uoyramo
+populate_with_player("euw1",["NoMoreAutopilot","Tytoccid","swxAurélien","DarKMissiles","Hide On Grass1","uoyramo"])

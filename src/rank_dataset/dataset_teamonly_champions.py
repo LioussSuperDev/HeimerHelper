@@ -1,6 +1,5 @@
 from typing import Iterator
 import numpy as np
-import torch
 from torch.utils.data import IterableDataset
 import json
 import os
@@ -11,7 +10,9 @@ from dataset_utils import rank_to_int,role_to_int
 player_match_size = 10+5
 basic_data_size = 2
 role_size = 5
-player_size = (basic_data_size+10*player_match_size+role_size)
+#8 champion stats
+champion_data_size = 8
+player_size = (basic_data_size+10*player_match_size+role_size+champion_data_size)
 total_size = 5*player_size+1
 
 def json_to_numpy(match, team):
@@ -40,20 +41,30 @@ def json_to_numpy(match, team):
         else:
             returned[idx_from_now+1] = 0.5
 
-        for i,c_match in enumerate(player["matches"]):
-            returned[idx_from_now+2+i*player_match_size] = int(c_match["win"])
-            returned[idx_from_now+2+i*player_match_size+1] = (c_match["matchDuration"])/3600000
-            returned[idx_from_now+2+i*player_match_size+2] = (c_match["kills"])
-            returned[idx_from_now+2+i*player_match_size+3] = (c_match["damage"])
-            returned[idx_from_now+2+i*player_match_size+4] = (c_match["gold"])
-            returned[idx_from_now+2+i*player_match_size+5] = (c_match["deaths"])
-            returned[idx_from_now+2+i*player_match_size+6] = (c_match["assists"])
-            returned[idx_from_now+2+i*player_match_size+7] = (c_match["cs"])
-            returned[idx_from_now+2+i*player_match_size+8] = (c_match["visionScore"])
-            returned[idx_from_now+2+i*player_match_size+9] = (c_match["creation_gap"])
-            returned[idx_from_now+2+i*player_match_size+9+role_to_int(c_match["role"])] = 1
-        pindex += 1
+        if "wins" in player["championData"]:
+            returned[idx_from_now+2] = player["championData"]["totalMatches"]
+            returned[idx_from_now+3] = player["championData"]["wins"]/player["championData"]["totalMatches"]
+            returned[idx_from_now+4] = player["championData"]["csPerMatch"]
+            returned[idx_from_now+5] = player["championData"]["damagePerMatch"]
+            returned[idx_from_now+6] = player["championData"]["deathsPerMatch"]
+            returned[idx_from_now+7] = player["championData"]["killsPerMatch"]
+            returned[idx_from_now+8] = player["championData"]["assistsPerMatch"]
+            returned[idx_from_now+9] = player["championData"]["goldPerMatch"]
 
+        for i,c_match in enumerate(player["matches"]):
+            returned[idx_from_now+10+i*player_match_size] = int(c_match["win"])
+            returned[idx_from_now+10+i*player_match_size+1] = (c_match["matchDuration"])/3600000
+            returned[idx_from_now+10+i*player_match_size+2] = (c_match["kills"])
+            returned[idx_from_now+10+i*player_match_size+3] = (c_match["damage"])
+            returned[idx_from_now+10+i*player_match_size+4] = (c_match["gold"])
+            returned[idx_from_now+10+i*player_match_size+5] = (c_match["deaths"])
+            returned[idx_from_now+10+i*player_match_size+6] = (c_match["assists"])
+            returned[idx_from_now+10+i*player_match_size+7] = (c_match["cs"])
+            returned[idx_from_now+10+i*player_match_size+8] = (c_match["visionScore"])
+            returned[idx_from_now+10+i*player_match_size+9] = (c_match["creation_gap"])
+            returned[idx_from_now+10+i*player_match_size+9+role_to_int(c_match["role"])] = 1
+        pindex += 1
+        
     if nb_ranked != 0:
         returned[-1] = ranked_points/nb_ranked
     else:

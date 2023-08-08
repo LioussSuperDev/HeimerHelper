@@ -1,10 +1,8 @@
 import sys
 import os
-from os.path import isfile, join
+from os.path import isfile
 import json
 sys.path.insert(0, '../..')
-from utils import progressbar
-
 
 def most_frequent(List):
     counter = 0
@@ -18,6 +16,18 @@ def most_frequent(List):
  
     return num
 
+def role_to_int(role):
+    if role.lower() == "top":
+        return 4
+    elif role.lower() == "jungle":
+        return 1
+    elif role.lower() == "midlane":
+        return 5
+    elif role.lower() == "adc":
+        return 3
+    elif role.lower() == "support":
+        return 2
+    
 def int_to_role(role):
     if role == 4:
         return "TOP"
@@ -70,9 +80,10 @@ def _handle_match(match, players_queues, winner, include_victory=True):
 
             if player["summonerName"] in players_queues:
                 player_queues = players_queues[player["summonerName"]]
+                
                 if player_queues != None:
-                    if player["championId"] in player_queues:
-                        perf = player_queues[player["championId"]]
+                    if str(player["championId"]) in player_queues and player_queues[str(player["championId"])]["totalMatches"] > 0:
+                        perf = player_queues[str(player["championId"])]
                         pdata["championData"]["wins"] = perf["wins"]
                         pdata["championData"]["totalMatches"] = perf["totalMatches"]
                         pdata["championData"]["csPerMatch"] = perf["cs"]/perf["totalMatches"]

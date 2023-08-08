@@ -1,13 +1,10 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import dataset_big
-import dataset_small
-import dataset_medium
+import dataset_fullgame
 import dataset_teamonly
+import dataset_teamonly_champions
 import os
 import model_architectures
-import torch_directml
+# import torch_directml
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -55,20 +52,19 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 
 
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-device = torch_directml.device()
+# device = torch_directml.device()
 
-train_dataset = dataset_big.RankDataSet(split="train")
-test_dataset = dataset_big.RankDataSet(split="test")
+train_dataset = dataset_fullgame.RankDataSet(split="train")
 
-print("Starting... data size :",dataset_big.get_datasize())
+print("Starting... data size :",dataset_fullgame.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.005,0.004,0.006,0.001,0.01,0.02]
-weight_decays = [0.001,0.0001,0.01]
+learning_rates = [0.001,0.005,0.004,0.006,0.01,0.02]
+weight_decays = [0.0005,0.0001,0.01]
 models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
-dsets = [(dataset_small,"small")]
+dsets = [(dataset_fullgame,"dataset_fullgame")]
 
 for model_type,model_name in models:
 
@@ -88,7 +84,7 @@ for model_type,model_name in models:
                 epoch_number = 0
                 
 
-                optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
+                optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=wd)
 
                 loss_fn = torch.nn.BCELoss()
 
