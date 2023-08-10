@@ -74,8 +74,10 @@ def get_next_tier_rank(tier,rank):
         return get_next_tier(tier),"i"
     return tier,get_next_rank(rank)
 
-def load_player_data(region, summonerName, save=False, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=1, verbose=False, small_verbose=False, time_limit_hours=None):
 
+
+
+def load_player_data(region, summonerName, save=False, matches_save_directory_path=None, force_download=False, Debug=False, max_number_of_matches=1, verbose=False, small_verbose=False, time_limit_hours=None):
 
     player_neighbour=[]
     
@@ -146,7 +148,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                                     if rk["seasonId"] == 21 and rk["queueType"] == "ranked_solo_5x5":
                                         prank = rk
                         player_neighbour.append(p["summonerName"])
-                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, champion_played=p["championId"], player_rank_to_update=prank)
+                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, player_rank_to_update=prank)
                 
                 if verbose:
                     print("last 10 matches of each player loaded                           ")
@@ -176,8 +178,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
         print("")
     return player_neighbour,returned_matches
 
-def get_single_player_stats(region, summonerName, matchCreationTime, verbose=False, update_ugg=True, champion_played=None, player_rank_to_update=None):
-
+def get_single_player_stats(region, summonerName, matchCreationTime, verbose=False, update_ugg=True, player_rank_to_update=None):
     page = 1
     stats = []
     
@@ -197,10 +198,8 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
         if queue["queueType"] != 420 or queue["seasonId"] != 21:
             continue
         for perf in queue["basicChampionPerformances"]:
-            if not (perf["championId"] in masteries_dict) or masteries_dict[perf["championId"]]["totalMatches"] < perf["totalMatches"]:
+            if (not perf["championId"] in masteries_dict) or masteries_dict[perf["championId"]]["totalMatches"] < perf["totalMatches"]:
                 masteries_dict[perf["championId"]] = perf
-
-
 
     #While we don't have the 10 matches before the current match
     while len(stats) < 10:
@@ -217,33 +216,35 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
 
         #Iteration over all the 20 matches we found
         for match in matches["matchSummaries"]:
-
+            
             #If we have the 10 matches before the game we can leave
             if len(stats) >= 10:
                 break
 
             local_creation_time = match["matchCreationTime"]
+            local_matchid = match["matchId"]
+            current_champion = match["championId"]
 
             #If the game is before the current match, we can add it to the list
-            if matchCreationTime == -1 or local_creation_time < matchCreationTime and match["matchDuration"]>500:
+            if local_creation_time < matchCreationTime and match["matchDuration"]>500:
                 stats.append({
                     "win": match["win"],
                     "match": match,
                 })
             
             #If the game is after the current match, we use it to update the players statistics to fit with the period the match is in
-            elif matchCreationTime == -1 or local_creation_time > matchCreationTime:
-                if champion_played in masteries_dict:
+            elif (local_creation_time > matchCreationTime) and match["matchDuration"] > 500:
+                if current_champion in masteries_dict:
                     #We don't count this game because it is done after the current match
-                    masteries_dict[champion_played]["totalMatches"] -= 1
+                    masteries_dict[current_champion]["totalMatches"] -= 1
                     if match["win"]:
-                        masteries_dict[champion_played]["wins"] -= 1
-                    masteries_dict[champion_played]["damage"] -= match["damage"]
-                    masteries_dict[champion_played]["assists"] -= match["assists"]
-                    masteries_dict[champion_played]["cs"] -= match["cs"]
-                    masteries_dict[champion_played]["deaths"] -= match["deaths"]
-                    masteries_dict[champion_played]["kills"] -= match["kills"]
-                    masteries_dict[champion_played]["gold"] -= match["gold"]
+                        masteries_dict[current_champion]["wins"] -= 1
+                    masteries_dict[current_champion]["damage"] -= match["damage"]
+                    masteries_dict[current_champion]["assists"] -= match["assists"]
+                    masteries_dict[current_champion]["cs"] -= match["cs"]
+                    masteries_dict[current_champion]["deaths"] -= match["deaths"]
+                    masteries_dict[current_champion]["kills"] -= match["kills"]
+                    masteries_dict[current_champion]["gold"] -= match["gold"]
 
                 if player_rank_to_update != None: 
                     if match["win"]:

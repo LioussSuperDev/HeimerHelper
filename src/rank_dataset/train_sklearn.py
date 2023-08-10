@@ -21,14 +21,14 @@ models += [(RandomForestClassifier(criterion='gini', max_depth=i),"RandomForest 
 
 ############################### DATASET
 
-# dset = dataset_fullgame
-# dset_name = "dataset_fullgame"
+dset = dataset_fullgame
+dset_name = "dataset_fullgame"
 
 # dset = dataset_teamonly
-#dset_name = "dataset_teamonly"
+# dset_name = "dataset_teamonly"
 
-dset = dataset_teamonly_champions
-dset_name = "team_only_champions"
+# dset = dataset_teamonly_champions
+# dset_name = "dataset_team_only_champions"
 
 #######################################
 
@@ -57,7 +57,7 @@ train_Y = np.hstack(train_Y)
 
 scaler = StandardScaler()
 scaler.fit(train_X)
-save_path = dset_name+"/models"
+save_path = "models/"+dset_name+"/"
 os.makedirs(save_path,exist_ok=True)
 pickle.dump(scaler,open(save_path+"/scaler.pickle","wb"))
 train_X = scaler.transform(train_X)

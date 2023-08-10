@@ -20,10 +20,6 @@ def populate_with_player(region, seed_player_names):
             print("Missing data in this game. Skipping the player...")
             del seed_player_names[0]
 
-#CHALLENGER NoMoreAutopilot
-#HIGH DIAMOND Tytoccid
-#EMERALD swxAurélien
-#PLATINUM DarKMissiles
-#GOLD Hide On Grass1
-#SILVER uoyramo
-populate_with_player("euw1",["NoMoreAutopilot","Tytoccid","swxAurélien","DarKMissiles","Hide On Grass1","uoyramo"])
+
+# populate_with_player("euw1",["NoMoreAutopilot","człowiek z gazu","soberbarrel","Rood Avel","uoyramo"])
+populate_with_player("euw1",["Eau distillée","swxAurélien","show tiddies","SP1R1T0FL1FE"])

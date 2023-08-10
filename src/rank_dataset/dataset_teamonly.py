@@ -25,7 +25,7 @@ def json_to_numpy(match, team):
 
         current_index = pindex*player_size
 
-        if "tier" in player:
+        if "tier" in player and player["tier"] != None:
             ranked_points += rank_to_int(player["tier"],player["rank"],player["lp"])
             nb_ranked += 1
 

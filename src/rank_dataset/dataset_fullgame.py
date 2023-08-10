@@ -47,6 +47,9 @@ def json_to_numpy(match):
                 returned[idx_from_now+1] = 0.5
 
             if "wins" in player["championData"]:
+                if player["championData"]["wins"] < 0:
+                    player["championData"]["totalMatches"] -= player["championData"]["wins"]
+                    player["championData"]["wins"] = 0
                 returned[idx_from_now+2] = player["championData"]["totalMatches"]
                 returned[idx_from_now+3] = player["championData"]["wins"]/player["championData"]["totalMatches"]
                 returned[idx_from_now+4] = player["championData"]["csPerMatch"]
