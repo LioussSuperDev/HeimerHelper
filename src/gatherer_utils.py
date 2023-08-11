@@ -107,7 +107,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
             match_creation_time = match["matchCreationTime"]
             now_time = time.time()*1000
 
-            if now_time - match_creation_time > time_limit_hours*3600000:
+            if time_limit_hours != None and now_time - match_creation_time > time_limit_hours*3600000:
                 if verbose:
                     print("match creation time exceeded. skipping current player. late of :",int((now_time - match_creation_time)/3600000)-time_limit_hours,"hours")
                 break
@@ -233,7 +233,7 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
                 })
             
             #If the game is after the current match, we use it to update the players statistics to fit with the period the match is in
-            elif (local_creation_time > matchCreationTime) and match["matchDuration"] > 500:
+            elif (local_creation_time >= matchCreationTime) and match["matchDuration"] > 500:
                 if current_champion in masteries_dict:
                     #We don't count this game because it is done after the current match
                     masteries_dict[current_champion]["totalMatches"] -= 1
@@ -241,7 +241,7 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
                         masteries_dict[current_champion]["wins"] -= 1
                     masteries_dict[current_champion]["damage"] -= match["damage"]
                     masteries_dict[current_champion]["assists"] -= match["assists"]
-                    masteries_dict[current_champion]["cs"] -= match["cs"]
+                    masteries_dict[current_champion]["cs"] -= (match["cs"]+match["jungleCs"])
                     masteries_dict[current_champion]["deaths"] -= match["deaths"]
                     masteries_dict[current_champion]["kills"] -= match["kills"]
                     masteries_dict[current_champion]["gold"] -= match["gold"]

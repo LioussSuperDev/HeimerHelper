@@ -90,7 +90,7 @@ def get_player_match_history(summonerName, role=[], regionId="euw1", duoName="",
     return json.loads(x.text)["data"]["fetchPlayerMatchSummaries"]
 
 
-def get_player_current_game(summonerName, regionId="euw"):
+def get_player_current_game(summonerName, regionId="euw1"):
     data = {
             "operationName": "GetLiveGame",
             "variables": {

@@ -21,5 +21,5 @@ def populate_with_player(region, seed_player_names):
             del seed_player_names[0]
 
 
-# populate_with_player("euw1",["NoMoreAutopilot","człowiek z gazu","soberbarrel","Rood Avel","uoyramo"])
-populate_with_player("euw1",["Eau distillée","swxAurélien","show tiddies","SP1R1T0FL1FE"])
+# populate_with_player("euw1",["TTheMuffinMan","EGAR352","Utternss"])
+populate_with_player("euw1",["Charlsmeisterr","MustBeAl1ve","Ephemerul"])

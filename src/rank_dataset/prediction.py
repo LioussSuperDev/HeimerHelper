@@ -1,13 +1,8 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import model_architectures
-import dataset_small
-import dataset_medium
-import dataset_big
+import dataset_fullgame
 import sys
-import numpy as np
-import torch_directml
+# import torch_directml
 from dataset_utils import _handle_match
 sys.path.insert(0, '..')
 import gatherer_utils
@@ -57,7 +52,7 @@ def use_models(outputs, prediction_mode, team_nb=None):
 
 
         if prediction_mode == "d":
-            print("joueur gagnant :",joueurGagnant,str(round(certitude*100,2))+"% (team "+str(gagnant)+")")
+            print("joueur gagnant :",joueurGagnant,str(round(certitude*100,3))+"% (winning team : "+str(gagnant)+")")
 
     if prediction_mode == "d":
         print("")
@@ -103,43 +98,50 @@ print("match(es) loaded !")
 
 sys.path.remove('..')
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
-device = torch_directml.device()
+# device = torch_directml.device()
 
 print("loading models...")
-model0 = model_architectures.MLP1(dataset_big.get_datasize())
-model0.load_state_dict(torch.load("models\\MLP1\\0.7988_l0.005_w0.001_dsetbig.state", map_location=device))
+model0 = model_architectures.MLP2(dataset_fullgame.get_datasize())
+model0.load_state_dict(torch.load("models\\dataset_fullgame\\MLP2\\0.945_l0.001_w0.0005_dsetdataset_fullgame.state", map_location=device))
 model0.eval()
 
-model1 = model_architectures.MLP2(dataset_small.get_datasize())
-model1.load_state_dict(torch.load("models\\MLP2\\0.7905_l0.005_w0.001_dsetsmall.state", map_location=device))
-model1.eval()
+# model1 = model_architectures.MLP2(dataset_fullgame.get_datasize())
+# model1.load_state_dict(torch.load("models\\MLP2\\0.7905_l0.005_w0.001_dsetsmall.state", map_location=device))
+# model1.eval()
 
-model2 = model_architectures.MLP2(dataset_medium.get_datasize())
-model2.load_state_dict(torch.load("models\\MLP2\\0.811_l0.005_w0.001_dsetmedium.state", map_location=device))
-model2.eval()
+# model2 = model_architectures.MLP2(dataset_fullgame.get_datasize())
+# model2.load_state_dict(torch.load("models\\MLP2\\0.811_l0.005_w0.001_dsetmedium.state", map_location=device))
+# model2.eval()
 
-model3 = model_architectures.MLP2(dataset_medium.get_datasize())
-model3.load_state_dict(torch.load("models\\MLP2\\0.8082_l0.005_w0.001_dsetmedium.state", map_location=device))
-model3.eval()
+# model3 = model_architectures.MLP2(dataset_fullgame.get_datasize())
+# model3.load_state_dict(torch.load("models\\MLP2\\0.8082_l0.005_w0.001_dsetmedium.state", map_location=device))
+# model3.eval()
 
 predictions = []
 
 
 if matches == None:
     outputs = []
-    proper_match1 = dataset_medium.json_to_numpy(handled_match)
-    proper_match2 = dataset_big.json_to_numpy(handled_match)
-    proper_match3 = dataset_small.json_to_numpy(handled_match)
-    outputs.append(model0(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
-    outputs.append(model1(torch.tensor(proper_match3).unsqueeze(dim=0))[0].item())
-    outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-    outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    proper_match1 = dataset_fullgame.json_to_numpy(handled_match)
+    # proper_match2 = dataset_fullgame.json_to_numpy(handled_match)
+    # proper_match3 = dataset_fullgame.json_to_numpy(handled_match)
+    outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    # outputs.append(model1(torch.tensor(proper_match3).unsqueeze(dim=0))[0].item())
+    # outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+    # outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
     predictions.append(use_models(outputs,prediction_mode))
 else:
     for name,match,masteries,team_nb in matches:
         handled_match = _handle_match(match, masteries, 0, include_victory=False)
+
+        handled_game_ordered = {}
+        for t in handled_match:
+            handled_game_ordered[t] = {}
+            for role in ["TOP","JUNGLE","MIDLANE","ADC","SUPPORT"]:
+                handled_game_ordered[t][role] = handled_match[t][role]
+        handled_match = handled_game_ordered
 
         if live_game:
             with open("last_live_game.json","w") as f:
@@ -148,14 +150,14 @@ else:
             with open("last_played_game.json","w") as f:
                 json.dump(handled_match,f)
 
-        proper_match1 = dataset_medium.json_to_numpy(handled_match)
-        proper_match2 = dataset_big.json_to_numpy(handled_match)
-        proper_match3 = dataset_small.json_to_numpy(handled_match)
+        proper_match1 = dataset_fullgame.json_to_numpy(handled_match)
+        # proper_match2 = dataset_big.json_to_numpy(handled_match)
+        # proper_match3 = dataset_small.json_to_numpy(handled_match)
         outputs = []
-        outputs.append(model0(torch.tensor(proper_match2).unsqueeze(dim=0))[0].item())
-        outputs.append(model1(torch.tensor(proper_match3).unsqueeze(dim=0))[0].item())
-        outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
-        outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+        outputs.append(model0(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+        # outputs.append(model1(torch.tensor(proper_match3).unsqueeze(dim=0))[0].item())
+        # outputs.append(model2(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
+        # outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
 
         predictions.append(use_models(outputs,prediction_mode,team_nb=team_nb))
 

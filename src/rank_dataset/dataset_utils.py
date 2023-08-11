@@ -66,8 +66,14 @@ def handle_match(file, include_victory=True):
 
 
 def _handle_match(match, players_queues, winner, include_victory=True):
+
+    for player in players_queues:
+        pq2 = {}
+        for champion in players_queues[player]:
+            pq2[str(champion)] = players_queues[player][champion]
+        players_queues[player] = pq2
+
     data = {}
-        
     if include_victory:
         data = {"teamA":{},"teamB":{},"winner":winner}
     else:
