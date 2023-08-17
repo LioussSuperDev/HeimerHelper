@@ -45,4 +45,4 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=512)
 cert_accuracies = test_model(model, test_loader, device)
 print("ACCURACY | CERTITUDE")
 for cert in cert_accuracies:
-    print(cert[0],cert[3])
+    print(cert[0],cert[3],"total :",cert[2])

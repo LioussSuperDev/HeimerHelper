@@ -53,6 +53,7 @@ def handle_match(file, include_victory=True):
         except:
             return {}
     players_queues = match["masteries_dict"]
+    prev_players_queues = match["masteries_dict_prev_season"]
     match = match["match"]
 
     #Telling who is the winner
@@ -62,16 +63,21 @@ def handle_match(file, include_victory=True):
 
             
 
-    return _handle_match(match, players_queues, winner, include_victory=True)
+    return _handle_match(match, prev_players_queues, players_queues, winner, include_victory=True)
 
 
-def _handle_match(match, players_queues, winner, include_victory=True):
+def _handle_match(match, prev_players_queues, players_queues, winner, include_victory=True):
 
     for player in players_queues:
         pq2 = {}
         for champion in players_queues[player]:
             pq2[str(champion)] = players_queues[player][champion]
         players_queues[player] = pq2
+    for player in prev_players_queues:
+        pq2 = {}
+        for champion in prev_players_queues[player]:
+            pq2[str(champion)] = prev_players_queues[player][champion]
+        prev_players_queues[player] = pq2
 
     data = {}
     if include_victory:
@@ -86,7 +92,7 @@ def _handle_match(match, players_queues, winner, include_victory=True):
 
             if player["summonerName"] in players_queues:
                 player_queues = players_queues[player["summonerName"]]
-                
+                prev_player_queues = prev_players_queues[player["summonerName"]]
                 if player_queues != None:
                     if str(player["championId"]) in player_queues and player_queues[str(player["championId"])]["totalMatches"] > 0:
                         perf = player_queues[str(player["championId"])]
@@ -98,7 +104,17 @@ def _handle_match(match, players_queues, winner, include_victory=True):
                         pdata["championData"]["killsPerMatch"] = perf["kills"]/perf["totalMatches"]
                         pdata["championData"]["assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
                         pdata["championData"]["goldPerMatch"] = perf["gold"]/perf["totalMatches"]
-            
+                if prev_player_queues != None:
+                    if str(player["championId"]) in prev_player_queues and prev_player_queues[str(player["championId"])]["totalMatches"] > 0:
+                        perf = prev_player_queues[str(player["championId"])]
+                        pdata["championData"]["prev_wins"] = perf["wins"]
+                        pdata["championData"]["prev_totalMatches"] = perf["totalMatches"]
+                        pdata["championData"]["prev_csPerMatch"] = perf["cs"]/perf["totalMatches"]
+                        pdata["championData"]["prev_damagePerMatch"] = perf["damage"]/perf["totalMatches"]
+                        pdata["championData"]["prev_deathsPerMatch"] = perf["deaths"]/perf["totalMatches"]
+                        pdata["championData"]["prev_killsPerMatch"] = perf["kills"]/perf["totalMatches"]
+                        pdata["championData"]["prev_assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
+                        pdata["championData"]["prev_goldPerMatch"] = perf["gold"]/perf["totalMatches"]
 
             #adding basic data about player
             for rank_player in match["allPlayerRanks"]:

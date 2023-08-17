@@ -13,7 +13,7 @@ player_match_size = 10+5
 #winrate/nb games
 basic_data_size = 2
 #8 champion stats
-champion_data_size = 8
+champion_data_size = 16
 role_size = 5
 player_size = (basic_data_size+10*player_match_size+role_size+champion_data_size)
 total_size = 10*player_size+1
@@ -24,7 +24,7 @@ def json_to_numpy(match):
     nb_ranked = 0
     ranked_points = 0
     pindex = 0
-    for team in match:
+    for team in ["teamA","teamB"]:
         for json_role in ["TOP","JUNGLE","MIDLANE","ADC","SUPPORT"]:
             if not json_role in match[team] or match[team][json_role] == None:
                 print("ALERT")
@@ -41,15 +41,12 @@ def json_to_numpy(match):
             idx_from_now = current_index+role_size
             returned[idx_from_now] = player["wins"]+player["losses"]
 
-            if player["wins"]+player["losses"] > 0:
+            if returned[idx_from_now] > 0:
                 returned[idx_from_now+1] = player["wins"]/(player["wins"]+player["losses"])
             else:
                 returned[idx_from_now+1] = 0.5
 
             if "wins" in player["championData"]:
-                if player["championData"]["wins"] < 0:
-                    player["championData"]["totalMatches"] -= player["championData"]["wins"]
-                    player["championData"]["wins"] = 0
                 returned[idx_from_now+2] = player["championData"]["totalMatches"]
                 returned[idx_from_now+3] = player["championData"]["wins"]/player["championData"]["totalMatches"]
                 returned[idx_from_now+4] = player["championData"]["csPerMatch"]
@@ -58,20 +55,35 @@ def json_to_numpy(match):
                 returned[idx_from_now+7] = player["championData"]["killsPerMatch"]
                 returned[idx_from_now+8] = player["championData"]["assistsPerMatch"]
                 returned[idx_from_now+9] = player["championData"]["goldPerMatch"]
-            wins = []
-            for i,c_match in enumerate(player["matches"]):
-                returned[idx_from_now+10+i*player_match_size] = int(c_match["win"])
-                wins.append(int(c_match["win"]))
-                returned[idx_from_now+10+i*player_match_size+1] = (c_match["matchDuration"])/3600000
-                returned[idx_from_now+10+i*player_match_size+2] = (c_match["kills"])
-                returned[idx_from_now+10+i*player_match_size+3] = (c_match["damage"])
-                returned[idx_from_now+10+i*player_match_size+4] = (c_match["gold"])
-                returned[idx_from_now+10+i*player_match_size+5] = (c_match["deaths"])
-                returned[idx_from_now+10+i*player_match_size+6] = (c_match["assists"])
-                returned[idx_from_now+10+i*player_match_size+7] = (c_match["cs"])
-                returned[idx_from_now+10+i*player_match_size+8] = (c_match["visionScore"])
-                returned[idx_from_now+10+i*player_match_size+9] = (c_match["creation_gap"])
-                returned[idx_from_now+10+i*player_match_size+9+role_to_int(c_match["role"])] = 1
+            else:
+                returned[idx_from_now+3] = 0.5
+            if "prev_wins" in player["championData"]:
+                returned[idx_from_now+10] = player["championData"]["prev_totalMatches"]
+                returned[idx_from_now+11] = player["championData"]["prev_wins"]/player["championData"]["prev_totalMatches"]
+                returned[idx_from_now+12] = player["championData"]["prev_csPerMatch"]
+                returned[idx_from_now+13] = player["championData"]["prev_damagePerMatch"]
+                returned[idx_from_now+14] = player["championData"]["prev_deathsPerMatch"]
+                returned[idx_from_now+15] = player["championData"]["prev_killsPerMatch"]
+                returned[idx_from_now+16] = player["championData"]["prev_assistsPerMatch"]
+                returned[idx_from_now+17] = player["championData"]["prev_goldPerMatch"]
+            else:
+                returned[idx_from_now+11] = 0.5
+            for i in range(10):
+                if i < len(player["matches"]):
+                    c_match = player["matches"][i]
+                    returned[idx_from_now+18+i*player_match_size] = int(c_match["win"])
+                    returned[idx_from_now+18+i*player_match_size+1] = (c_match["matchDuration"])/3600000
+                    returned[idx_from_now+18+i*player_match_size+2] = (c_match["kills"])
+                    returned[idx_from_now+18+i*player_match_size+3] = (c_match["damage"])
+                    returned[idx_from_now+18+i*player_match_size+4] = (c_match["gold"])
+                    returned[idx_from_now+18+i*player_match_size+5] = (c_match["deaths"])
+                    returned[idx_from_now+18+i*player_match_size+6] = (c_match["assists"])
+                    returned[idx_from_now+18+i*player_match_size+7] = (c_match["cs"])
+                    returned[idx_from_now+18+i*player_match_size+8] = (c_match["visionScore"])
+                    returned[idx_from_now+18+i*player_match_size+9] = (c_match["creation_gap"])
+                    returned[idx_from_now+18+i*player_match_size+9+role_to_int(c_match["role"])] = 1
+                else:
+                    returned[idx_from_now+18+i*player_match_size] = 0.5
             pindex += 1
     if nb_ranked != 0:
         returned[-1] = ranked_points/nb_ranked

@@ -2,6 +2,7 @@ import torch
 import dataset_fullgame
 import dataset_teamonly
 import dataset_teamonly_champions
+import dataset_fullgame_limited
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 import xgboost as xgb
@@ -21,8 +22,11 @@ models += [(RandomForestClassifier(criterion='gini', max_depth=i),"RandomForest 
 
 ############################### DATASET
 
-dset = dataset_fullgame
-dset_name = "dataset_fullgame"
+dset = dataset_fullgame_limited
+dset_name = "dataset_fullgame_limited"
+
+# dset = dataset_fullgame
+# dset_name = "dataset_fullgame"
 
 # dset = dataset_teamonly
 # dset_name = "dataset_teamonly"

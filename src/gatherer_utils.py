@@ -103,7 +103,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                 print(count,max_number_of_matches,end="\r")
             count += 1
             masteries_dict = {}
-
+            masteries_dict_prev_season = {}
             match_creation_time = match["matchCreationTime"]
             now_time = time.time()*1000
 
@@ -128,7 +128,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                     if Debug:
                         print("Found Match in local data.")
                     match = json.load(f)
-                    match,masteries_dict = match["match"],match["masteries_dict"]
+                    match,masteries_dict,masteries_dict_prev_season = match["match"],match["masteries_dict"],match["masteries_dict_prev_season"]
                     local_loaded = True
             else:
                 match = UGGApi.get_match(match_id, summonerName, match["version"], regionId=region)
@@ -148,7 +148,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                                     if rk["seasonId"] == 21 and rk["queueType"] == "ranked_solo_5x5":
                                         prank = rk
                         player_neighbour.append(p["summonerName"])
-                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, player_rank_to_update=prank)
+                        masteries_dict_prev_season[p["summonerName"]],masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, player_rank_to_update=prank)
                 
                 if verbose:
                     print("last 10 matches of each player loaded                           ")
@@ -168,12 +168,12 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                 os.makedirs(matches_save_directory_path, exist_ok=True)
                 if(not os.path.isfile(file_path)):
                     with open(file_path, "w") as f:
-                        f.write(json.dumps({"match":match,"masteries_dict":masteries_dict}))
+                        f.write(json.dumps({"match":match,"masteries_dict":masteries_dict,"masteries_dict_prev_season":masteries_dict_prev_season}))
             teamnb = 1
             for p in match["matchSummary"]["teamB"]:
                 if p["summonerName"].lower() == summonerName.lower():
                     teamnb = 2
-            returned_matches.append((match_id,match,masteries_dict,teamnb))
+            returned_matches.append((match_id,match,masteries_dict_prev_season,masteries_dict,teamnb))
     if small_verbose:
         print("")
     return player_neighbour,returned_matches
@@ -190,16 +190,27 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
         print("doing",summonerName,"masteries                            ",end="\r")
 
     #Getting player champion's statistics
-    masteries = UGGApi.get_player_stats(summonerName, regionId=region)
-
+    masteries = UGGApi.get_player_stats(summonerName, regionId=region, seasonId=21)
+    prev_masteries = UGGApi.get_player_stats(summonerName, regionId=region, seasonId=20)
     #removing duplicates and finding revelant data
     masteries_dict={}
+    masteries_dict_prev_season={}
     for queue in masteries:
         if queue["queueType"] != 420 or queue["seasonId"] != 21:
             continue
         for perf in queue["basicChampionPerformances"]:
             if (not perf["championId"] in masteries_dict) or masteries_dict[perf["championId"]]["totalMatches"] < perf["totalMatches"]:
                 masteries_dict[perf["championId"]] = perf
+    for queue in prev_masteries:
+        if queue["queueType"] != 420 or queue["seasonId"] != 20:
+            continue
+        for perf in queue["basicChampionPerformances"]:
+            if (not perf["championId"] in masteries_dict_prev_season) or masteries_dict_prev_season[perf["championId"]]["totalMatches"] < perf["totalMatches"]:
+                masteries_dict_prev_season[perf["championId"]] = perf
+                masteries_dict_prev_season[perf["championId"]]["assists"] = int(masteries_dict_prev_season[perf["championId"]]["assists"])
+                masteries_dict_prev_season[perf["championId"]]["cs"] = int(masteries_dict_prev_season[perf["championId"]]["cs"])
+                masteries_dict_prev_season[perf["championId"]]["kills"] = int(masteries_dict_prev_season[perf["championId"]]["kills"])
+                masteries_dict_prev_season[perf["championId"]]["deaths"] = int(masteries_dict_prev_season[perf["championId"]]["deaths"])
 
     #While we don't have the 10 matches before the current match
     while len(stats) < 10:
@@ -265,7 +276,7 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
         #If not enough matches found we check next page on next iteration
         page += 1
 
-    return masteries_dict,stats
+    return masteries_dict_prev_season,masteries_dict,stats
 
 
 def gather_live_game(regionId, summonerName, update_ugg=True, verbose=True):
@@ -300,6 +311,7 @@ def gather_live_game(regionId, summonerName, update_ugg=True, verbose=True):
     returned_game["allPlayerRanks"] = []
     returned_game["matchSummary"]["matchCreationTime"] = int(time.time()*1000)
     masteries = {}
+    prev_masteries = {}
     for team in ["teamA","teamB"]:
         returned_game["matchSummary"][team] = game[team]
         for player in returned_game["matchSummary"][team]:
@@ -309,8 +321,8 @@ def gather_live_game(regionId, summonerName, update_ugg=True, verbose=True):
             if team == "teamB" and player["summonerName"].lower() == summonerName.lower():
                 team_nb = 2
 
-            masteries[player["summonerName"]],player["last10matches"] = get_single_player_stats(regionId, player["summonerName"], returned_game["matchSummary"]["matchCreationTime"])
+            prev_masteries[player["summonerName"]],masteries[player["summonerName"]],player["last10matches"] = get_single_player_stats(regionId, player["summonerName"], returned_game["matchSummary"]["matchCreationTime"])
             returned_game["allPlayerRanks"].append({"summonerName":player["summonerName"],"rankScores":([player["currentSeasonRankScore"]] if player["currentSeasonRankScore"] != None else []) })
             player["role"] = role_to_int(player["currentRole"])
 
-    return returned_game,masteries,team_nb
+    return returned_game,prev_masteries,masteries,team_nb

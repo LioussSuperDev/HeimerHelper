@@ -1,5 +1,6 @@
 import torch
 import dataset_fullgame
+import dataset_fullgame_limited
 import dataset_teamonly
 import dataset_teamonly_champions
 import os
@@ -55,15 +56,15 @@ def train_one_epoch(training_loader, optimizer, loss_fn, device):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #device = torch.device("cpu")
 # device = torch_directml.device()
-dset,dset_name = dataset_fullgame,"dataset_fullgame"
+dset,dset_name = dataset_fullgame_limited,"dataset_fullgame_limited"
 # dset,dset_name = dataset_teamonly,"dataset_teamonly"
 train_dataset = dset.RankDataSet(split="train")
 
 print("Starting... data size :",dset.get_datasize())
 print("Number of training exemples :",len(train_dataset))
 
-learning_rates = [0.001,0.005,0.004,0.006,0.01,0.02]
-weight_decays = [0.0005,0.0001,0.01]
+learning_rates = [0.002,0.001,0.004,0.006,0.01,0.02]
+weight_decays = [0.002,0.0001,0.01]
 models = [(model_architectures.MLP2,"MLP2"),(model_architectures.MLP3,"MLP3")]
 dsets = [(dset,dset_name)]
 
@@ -112,7 +113,6 @@ for model_type,model_name in models:
                         vlabels = vlabels.to(device)
 
                         voutputs = model(vinputs)
-
                         vloss = loss_fn(voutputs, vlabels.unsqueeze(dim=1))
                         running_vloss += vloss.item()
 

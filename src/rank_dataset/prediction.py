@@ -88,8 +88,8 @@ else:
 
     live_game = False
     if choix == 0:
-        ma,mas,t = gatherer_utils.gather_live_game("euw1",sn)
-        matches = [("live",ma,mas,t)]
+        ma,pmas,mas,t = gatherer_utils.gather_live_game("euw1",sn)
+        matches = [("live",ma,pmas,mas,t)]
         live_game = True
     else:
         _,matches = gatherer_utils.load_player_data("euw1", sn, max_number_of_matches=choix, small_verbose=True)
@@ -104,7 +104,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("loading models...")
 model0 = model_architectures.MLP2(dataset_fullgame.get_datasize())
-model0.load_state_dict(torch.load("models\\dataset_fullgame\\MLP2\\0.945_l0.001_w0.0005_dsetdataset_fullgame.state", map_location=device))
+model0.load_state_dict(torch.load("models\\dataset_fullgame\\MLP2\\0.5111_l0.001_w0.0005_dsetdataset_fullgame.state", map_location=device))
 model0.eval()
 
 # model1 = model_architectures.MLP2(dataset_fullgame.get_datasize())
@@ -133,8 +133,8 @@ if matches == None:
     # outputs.append(model3(torch.tensor(proper_match1).unsqueeze(dim=0))[0].item())
     predictions.append(use_models(outputs,prediction_mode))
 else:
-    for name,match,masteries,team_nb in matches:
-        handled_match = _handle_match(match, masteries, 0, include_victory=False)
+    for name,match,prev_masteries,masteries,team_nb in matches:
+        handled_match = _handle_match(match, prev_masteries, masteries, 0, include_victory=False)
 
         handled_game_ordered = {}
         for t in handled_match:
