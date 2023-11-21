@@ -8,7 +8,7 @@ import random
 from dataset_utils import rank_to_int,role_to_int
 
 player_match_size = 1
-basic_data_size = 5
+basic_data_size = 7
 player_size = (basic_data_size+10*player_match_size)
 total_size = 10*player_size
 
@@ -44,9 +44,10 @@ def json_to_numpy(match):
 
                 #5
                 returned[current_index+4] = player["championData"]["wins"]/player["championData"]["totalMatches"]
-
+            returned[current_index+5] = player["championData"]["champion_stats_winrate"]
+            returned[current_index+6] = player["championData"]["champion_stats_opponent"]
             for i,c_match in enumerate(player["matches"]):
-                returned[current_index+5+i*player_match_size] = int(c_match["win"])
+                returned[current_index+7+i*player_match_size] = int(c_match["win"])
 
             pindex += 1
     return returned

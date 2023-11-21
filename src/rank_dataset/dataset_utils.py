@@ -59,12 +59,21 @@ def _handle_match(match, players_queues, winner, include_victory=True):
     data = {}
         
     if include_victory:
-        data = {"teamA":{},"teamB":{},"winner":winner}
+        data = {"teamA":{},"teamB":{},"winner":winner,"game_time":match["matchSummary"]["matchDuration"]}
     else:
         data = {"teamA":{},"teamB":{}}
 
     for team in ["teamA","teamB"]:
+        otherTeam = "teamB"
+        if team == "teamB":
+            otherTeam = "teamA"
+
         for player in match["matchSummary"][team]:
+            
+            opponent = None
+            for opp in match["matchSummary"][otherTeam]:
+                if opp["role"] == player["role"]:
+                    opponent = opp
 
             pdata = {"matches":[],"wins":0,"losses":0,"premade":[],"championData":{"championId":player["championId"]}}
 
@@ -82,7 +91,26 @@ def _handle_match(match, players_queues, winner, include_victory=True):
                         pdata["championData"]["assistsPerMatch"] = perf["assists"]/perf["totalMatches"]
                         pdata["championData"]["goldPerMatch"] = perf["gold"]/perf["totalMatches"]
             
-
+            #adding champion related data
+            if "average_stats" in player["championStats"]["data"]["summary"]["summary"].keys() and player["championStats"]["data"]["summary"]["summary"]["average_stats"] != None:
+                pdata["championData"]["champion_stats_winrate"] = player["championStats"]["data"]["summary"]["summary"]["average_stats"]["win_rate"]
+                pdata["championData"]["champion_stats_tier"] = player["championStats"]["data"]["summary"]["summary"]["average_stats"]["tier"]
+                pdata["championData"]["champion_stats_rank"] = player["championStats"]["data"]["summary"]["summary"]["average_stats"]["rank"]
+                pdata["championData"]["champion_stats_kda"] = player["championStats"]["data"]["summary"]["summary"]["average_stats"]["kda"]
+            else:
+                pdata["championData"]["champion_stats_winrate"] = -1
+                pdata["championData"]["champion_stats_tier"] = -1
+                pdata["championData"]["champion_stats_rank"] = -1
+                pdata["championData"]["champion_stats_kda"] = -1
+            pdata["championData"]["champion_stats_opponent"] = -1
+            opp_champ_id = opponent["championId"]
+            for i in player["championStats"]["data"]["summary"]["opponents"]:
+                for champ in i:
+                    if champ["champion_id"] == opp_champ_id:
+                        pdata["championData"]["champion_stats_opponent"] = champ["win_rate"]/100
+            for champ in player["championStats"]["data"]["summary"]["counters"]:
+                if champ["champion_id"] == opp_champ_id:
+                    pdata["championData"]["champion_stats_opponent"] = champ["win"]/champ["play"]
             #adding basic data about player
             for rank_player in match["allPlayerRanks"]:
                 if rank_player["summonerName"] == player["summonerName"]:
@@ -93,7 +121,6 @@ def _handle_match(match, players_queues, winner, include_victory=True):
                             pdata["lp"] = rank["lp"]
                             pdata["wins"] = rank["wins"]
                             pdata["losses"] = rank["losses"]
-
             
 
             for last_match in player["last10matches"]:
@@ -127,12 +154,14 @@ def _handle_match(match, players_queues, winner, include_victory=True):
                     "role":int_to_role(last_match["match"]["role"]),
                     "creation_gap":match["matchSummary"]["matchCreationTime"]-last_match["match"]["matchCreationTime"]
                     })
+                
             if len(pdata["premade"]) != 0:
                 pdata["premade"] = [most_frequent(pdata["premade"])]
                 for premade_player in match["matchSummary"][team]:
                     if premade_player["summonerName"] == pdata["premade"][0]:
                         pdata["premade"] = [int_to_role(premade_player["role"])]
             data[team][int_to_role(player["role"])] = pdata
+
     return data
 
 def load_and_handle_match(file_path):

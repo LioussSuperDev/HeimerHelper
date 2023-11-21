@@ -14,6 +14,9 @@ match_list = [f for f in os.listdir("..\\data\\matches") if isfile(join("..\\dat
 
 index = 0
 expl = 0
+
+test_rate = 4
+
 print()
 print("Clearing downloaded data and copying to dataset/")
 print("Working...",progressbar.get_progression(index,len(match_list),40,filled_str="■",empty_str=":"),str(round(100*index/len(match_list),2))+"%","("+str(index)+"/"+str(len(match_list))+")",end="\r")
@@ -23,7 +26,7 @@ for file in match_list:
     if match_cleared_datas != {}:
         expl += 1
         split = "train"
-        if expl%8 == 0:
+        if expl%test_rate == 0:
             split = "test"
         with open(join(os.path.dirname(__file__), join("dataset/"+split,file)), "w") as f:
             try:
