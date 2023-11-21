@@ -18,6 +18,12 @@ roles_map = {
     "all":7
 }
 
+
+versions = requests.get("https://ddragon.leagueoflegends.com/api/versions.json", headers=headers)
+latest = json.loads(versions.text)[0].strip()
+ddragon = requests.get(f"https://ddragon.leagueoflegends.com/cdn/{latest}/data/en_US/champion.json", headers=headers)
+championJson = json.loads(ddragon.text)["data"]
+
 def update_ugg(summonerName, regionId="euw1"):
     data = {
             "operationName": "UpdatePlayerProfile",
@@ -93,3 +99,25 @@ def get_player_current_game(summonerName, regionId="euw"):
            }
     x = requests.post("https://u.gg/api",json=data,headers=headers)
     return json.loads(x.text)["data"]["getLiveGame"]
+ 
+
+def champion_from_id(championId):
+    for champion in championJson:
+        if championJson[champion]["key"] == str(championId):
+            return championJson[champion]["id"]
+
+def get_champion_winrate(championId, roleId, tier=None):
+    champ1 = champion_from_id(championId)
+    for k in roles_map:
+        if roles_map[k] == roleId:
+            role = k
+    if role == "toplane":
+        role = "top"
+    if role == "midlane":
+        role = "mid"
+
+    if tier == None:
+        x = requests.get("https://www.op.gg/_next/data/h8xVwZg4iCsllQ-RQ1T64/en_US/champions/"+champ1+"/counters/"+role+".json?position="+role, headers=headers)
+    else:
+        x = requests.get("https://www.op.gg/_next/data/h8xVwZg4iCsllQ-RQ1T64/en_US/champions/"+champ1+"/counters/"+role+".json?tier="+tier+"&position="+role, headers=headers)
+    return json.loads(x.text)["pageProps"]
