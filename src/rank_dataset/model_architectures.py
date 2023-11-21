@@ -120,18 +120,18 @@ class MLP2_TEAM(nn.Module):
         return next(self.parameters()).device
     
 class MLP3(nn.Module):
-    def __init__(self, input_size):
+    def __init__(self, input_size, dropout=0.4):
         super(MLP3, self).__init__()
 
         self.bn0 = torch.nn.BatchNorm1d(input_size)
         self.fc0 = nn.Linear(input_size, 10)
         self.relu0 = nn.ReLU()
-        self.dropout0 = nn.Dropout(0.4)
+        self.dropout0 = nn.Dropout(dropout)
 
         self.bn1 = torch.nn.BatchNorm1d(10)
         self.fc1 = nn.Linear(10, 10)
         self.relu1 = nn.ReLU()
-        self.dropout1 = nn.Dropout(0.4)
+        self.dropout1 = nn.Dropout(dropout)
 
         self.bnfinal = torch.nn.BatchNorm1d(10)
         self.fcfinal = nn.Linear(10, 1)
