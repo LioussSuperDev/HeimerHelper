@@ -128,7 +128,6 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
             if (not "matchSummary" in match) or (match["matchSummary"] == None):
                 print(match)
                 exit(1)
-                continue
 
             if not local_loaded:
                 for team in ["teamA","teamB"]:
@@ -141,7 +140,7 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
                                     if rk["seasonId"] == 21 and rk["queueType"] == "ranked_solo_5x5":
                                         prank = rk
                         player_neighbour.append(p["summonerName"])
-                        masteries_dict[p["summonerName"]],p["last10matches"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, champion_played=p["championId"], player_rank_to_update=prank)
+                        masteries_dict[p["summonerName"]],p["last10matches"],p["championStats"] = get_single_player_stats(region, p["summonerName"], match_creation_time, verbose=verbose, champion_played=p["championId"], role=p["role"], player_rank_to_update=prank)
                 
                 if verbose:
                     print("last 10 matches of each player loaded                           ")
@@ -171,11 +170,15 @@ def load_player_data(region, summonerName, save=False, matches_save_directory_pa
         print("")
     return player_neighbour,returned_matches
 
-def get_single_player_stats(region, summonerName, matchCreationTime, verbose=False, update_ugg=True, champion_played=None, player_rank_to_update=None):
+def get_single_player_stats(region, summonerName, matchCreationTime, verbose=False, update_ugg=True, champion_played=None, player_rank_to_update=None, role=None):
 
     page = 1
     stats = []
-    
+    if player_rank_to_update != None:
+        champ_stats = UGGApi.get_champion_winrate(champion_played, role, tier=player_rank_to_update["tier"])
+    else:
+        champ_stats = UGGApi.get_champion_winrate(champion_played, role)
+
     #Updating u.gg statistics
     if update_ugg:
         UGGApi.update_ugg(summonerName,region)
@@ -259,7 +262,7 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
         #If not enough matches found we check next page on next iteration
         page += 1
 
-    return masteries_dict,stats
+    return masteries_dict,stats,champ_stats
 
 
 def gather_live_game(regionId, summonerName, update_ugg=True, verbose=True):

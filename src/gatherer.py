@@ -27,4 +27,4 @@ def populate_with_player(region, seed_player_names):
 
 
 
-populate_with_player("euw1",["Liouss","Inting Pineapple","Darkk Sasuke","BBS RayZor","Eau distillée"])
+populate_with_player("euw1",["Get fizzzed"])
