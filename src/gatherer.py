@@ -3,6 +3,7 @@ import gatherer_utils
 import time
 import socket
 import requests
+import random
 from urllib3.exceptions import MaxRetryError,NewConnectionError
 sys.path.insert(0, '..')
 def populate_with_player(region, seed_player_names):
@@ -16,9 +17,9 @@ def populate_with_player(region, seed_player_names):
             print(len(seed_player_names),"players remaining...               ")
         except (ConnectionError, socket.gaierror, MaxRetryError, NewConnectionError, requests.ConnectionError):
             print("U.GG RATE LIMIT ! WAITING 2 MINUTES               ")
-            time.sleep(30)
-        except BaseException as e:
-            print("Missing data in this game. Skipping the player...")
-            del seed_player_names[0]
+            time.sleep(60+random.randint(0,20))
+        # except BaseException as e:
+        #     print("Missing data in this game. Skipping the player...")
+        #     del seed_player_names[0]
 
-populate_with_player("euw1",["Get fizzzed"])
+populate_with_player("euw1",["KaisaFa"])

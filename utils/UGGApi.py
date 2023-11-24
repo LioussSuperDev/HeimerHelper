@@ -116,7 +116,19 @@ def champion_from_id(championId):
         if championJson[champion]["key"] == str(championId):
             return championJson[champion]["id"]
 
+opggurlcode = None
+def update_opgg_url():
+    global opggurlcode
+    x = requests.get("https://www.op.gg/champions/nasus/runes/top", headers=headers).text.split("https://s-lol-web.op.gg/_next/static/")
+    for i in x[1:]:
+        code = i.split("/")[0]
+        if not code in ["media","css","chunks"] and len(code) > 15:
+            opggurlcode = code
+            return
+
+update_opgg_url()
 def get_champion_winrate(championId, roleId, tier=None):
+    global opggurlcode
     champ1 = champion_from_id(championId)
     for k in roles_map:
         if roles_map[k] == roleId:
@@ -125,9 +137,19 @@ def get_champion_winrate(championId, roleId, tier=None):
         role = "top"
     if role == "midlane":
         role = "mid"
-
+    if opggurlcode == None:
+        update_opgg_url()
     if tier == None:
-        x = requests.get("https://www.op.gg/_next/data/h8xVwZg4iCsllQ-RQ1T64/en_US/champions/"+champ1+"/counters/"+role+".json?position="+role, headers=headers)
+        x = requests.get("https://www.op.gg/_next/data/"+opggurlcode+"/en_US/champions/"+champ1+"/counters/"+role+".json?position="+role, headers=headers)
     else:
-        x = requests.get("https://www.op.gg/_next/data/h8xVwZg4iCsllQ-RQ1T64/en_US/champions/"+champ1+"/counters/"+role+".json?tier="+tier+"&position="+role, headers=headers)
-    return json.loads(x.text)["pageProps"]
+        x = requests.get("https://www.op.gg/_next/data/"+opggurlcode+"/en_US/champions/"+champ1+"/counters/"+role+".json?tier="+tier+"&position="+role, headers=headers)
+    try:
+        props = json.loads(x.text)["pageProps"]
+    except:
+        update_opgg_url()
+        if tier == None:
+            x = requests.get("https://www.op.gg/_next/data/"+opggurlcode+"/en_US/champions/"+champ1+"/counters/"+role+".json?position="+role, headers=headers)
+        else:
+            x = requests.get("https://www.op.gg/_next/data/"+opggurlcode+"/en_US/champions/"+champ1+"/counters/"+role+".json?tier="+tier+"&position="+role, headers=headers)
+        props = json.loads(x.text)["pageProps"]
+    return props

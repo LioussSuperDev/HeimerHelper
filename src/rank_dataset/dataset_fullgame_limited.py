@@ -8,7 +8,7 @@ import random
 from dataset_utils import rank_to_int,role_to_int
 np.set_printoptions(threshold=100000, suppress=True)
 
-player_size = 16
+player_size = 18
 total_size = 10*player_size+1
 
 def json_to_numpy(match):
@@ -46,11 +46,14 @@ def json_to_numpy(match):
                 returned[idx_from_now+5] = player["championData"]["prev_wins"]/player["championData"]["prev_totalMatches"]
             else:
                 returned[idx_from_now+5] = 0.5
+
+            returned[idx_from_now+6] = player["championData"]["champion_stats_winrate"]
+            returned[idx_from_now+7] = player["championData"]["champion_stats_opponent"]
             for i in range(10):
                 if i < len(player["matches"]):
-                    returned[idx_from_now+6+i] = int(player["matches"][i]["win"])
+                    returned[idx_from_now+8+i] = int(player["matches"][i]["win"])
                 else:
-                    returned[idx_from_now+6+i] = 0.5
+                    returned[idx_from_now+8+i] = 0.5
 
             pindex += 1
     if nb_ranked != 0:

@@ -6,7 +6,29 @@ import time
 sys.path.insert(0, '..')
 from utils import UGGApi
 
-
+def get_current_tier(tier):
+    if tier.lower()[0] == "i":
+        return "iron"
+    elif tier.lower()[0] == "b":
+        return "bronze"
+    elif tier.lower()[0] == "s":
+        return "silver"
+    elif tier.lower()[0] == "g":
+        return "gold"
+    elif tier.lower()[0] == "p":
+        return "platinum"
+    elif tier.lower()[0] == "e":
+        return "emerald"
+    elif tier.lower()[0] == "d":
+        return "diamond"
+    elif tier.lower()[0] == "m":
+        return "master"
+    elif tier.lower()[0] == "g":
+        return "grandmaster"
+    elif tier.lower()[0] == "c":
+        return "challenger"
+    else:
+        return tier
 
 def get_previous_tier(tier):
     if tier.lower()[0] == "b":
@@ -277,6 +299,8 @@ def get_single_player_stats(region, summonerName, matchCreationTime, verbose=Fal
                             elif match["lpInfo"]["lp"] < 0:
                                 player_rank_to_update["lp"] = 100 + match["lpInfo"]["lp"]
                                 player_rank_to_update["tier"],player_rank_to_update["rank"] = get_next_tier_rank(match["lpInfo"]["promotedTo"]["tier"],match["lpInfo"]["promotedTo"]["rank"])
+                        player_rank_to_update["tier"] = get_current_tier(player_rank_to_update["tier"]).upper()
+                        player_rank_to_update["rank"] = player_rank_to_update["rank"].upper()
         #If not enough matches found we check next page on next iteration
         page += 1
 
